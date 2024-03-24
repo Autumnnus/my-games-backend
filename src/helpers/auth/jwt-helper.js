@@ -7,7 +7,7 @@ const generateAccessToken = (user,res) => {
     .cookie("access_token", token, {
       httpOnly: true,
       expires: new Date(Date.now() + parseInt("10") * 1000 * 60),
-      secure: false
+      secure: process.env.NODE_ENV === "development" ? false : true
     })
     .json({
       success: true,
@@ -19,8 +19,16 @@ const generateAccessToken = (user,res) => {
     });
 };
 
-const generateRefreshToken = (userInfo) => {
-  return jwt.sign(userInfo, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "1y" });
+const isTokenIncluded = (req) => {
+  return (
+    req.headers.authorization && req.headers.authorization.startsWith("Bearer:")
+  );
 };
 
-module.exports = { generateAccessToken,generateRefreshToken };
+const getAccessTokenFromHeader = (req) => {
+  const authorization = req.headers.authorization;
+  const access_token = authorization.split(" ")[1];
+  return access_token;
+};
+
+module.exports = { generateAccessToken,isTokenIncluded,getAccessTokenFromHeader };

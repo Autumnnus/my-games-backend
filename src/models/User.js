@@ -5,15 +5,24 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const UserSchema = new Schema({
-  username: {
+  name: {
     type: String,
-    required: [true, "Please enter a username"]
+    required: [true, "Please enter a name"]
   },
   password: {
     type: String,
     minlength: [6, "Please enter a password with min length 6"],
     required: [true, "Please enter a password"],
     select: true
+  },
+  email: {
+    type: String,
+    required: [true, "Please enter an email"],
+    unique: true,
+    match: [
+      /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
+      "Please provide a valid email"
+    ]
   }
 });
 
@@ -22,7 +31,7 @@ UserSchema.methods.generateJwtFromUser = function () {
   const { ACCESS_TOKEN_SECRET } = process.env;
   const payload = {
     id: this._id,
-    name: this.username
+    name: this.name
   };
 
   const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {

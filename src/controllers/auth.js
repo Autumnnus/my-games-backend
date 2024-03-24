@@ -7,15 +7,22 @@ const {
 } = require("../helpers/input/inputHelpers");
 const {  generateAccessToken } = require("../helpers/auth/jwt-helper");
 
-const register = asyncErrorWrapper(async (req, res) => {
-  const { username,  password  } = req.body;
+const register = asyncErrorWrapper(async (req, res,next) => {
+  const { email, name,  password  } = req.body;
 
-  const user = await User.create({
-    username: username,
-    password: password
-  });
-  generateAccessToken(user,res);
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ success: false, message: 'This user already exists' });
+  }
+
+  if (!validateUserInput(email, password)) {
+    return res.status(400).json({ success: false, message: 'Please check your inputs' });
+  }
+  const newUser = await User.create({ email, name, password });
+
+  generateAccessToken(newUser, res);
 });
+
 const login = asyncErrorWrapper(async (req, res, next) => {
   const { email, password } = req.body;
   if (!validateUserInput(email, password)) {
@@ -26,9 +33,9 @@ const login = asyncErrorWrapper(async (req, res, next) => {
   if (!comparePassword(password, user.password)) {
     return next(new CustomError("Please check your password", 400));
   }
-
   generateAccessToken(user, res);
 });
+
 const logout = asyncErrorWrapper(async (req, res, next) => {
   const { NODE_ENV } = process.env;
   return res

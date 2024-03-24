@@ -21,6 +21,7 @@
     "no-unused-expressions": ["error", { "allowTernary": true }],
     "no-useless-concat": "error",
     "no-useless-return": "error",
+    "no-useless-escape": "off",
     "no-constant-condition": "warn",
     "comma-dangle": ["error", "never"],
     "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|__" }],
