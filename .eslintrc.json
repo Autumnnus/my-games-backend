@@ -22,6 +22,7 @@
     "no-useless-concat": "error",
     "no-useless-return": "error",
     "no-constant-condition": "warn",
+    "comma-dangle": ["error", "never"],
     "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|__" }],
     //* Enhance Readability
     "indent": ["error", 2, { "SwitchCase": 1 }],
@@ -35,7 +36,6 @@
     "max-lines": ["error", { "max": 500 }],
     "keyword-spacing": "error",
     "multiline-ternary": ["error", "never"],
-    "no-mixed-operators": "error",
     //
     "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
     "no-whitespace-before-property": "error",
