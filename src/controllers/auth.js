@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const CustomError = require("../helpers/errors/CustomError");
+const bcrypt = require("bcryptjs");
 const asyncErrorWrapper = require("express-async-handler");
 const {
   validateUserInput,
@@ -30,7 +31,7 @@ const login = asyncErrorWrapper(async (req, res, next) => {
   }
 
   const user = await User.findOne({ email }).select("+password");
-  if (!comparePassword(password, user.password)) {
+  if (!comparePassword(password, user.password)) { 
     return next(new CustomError("Please check your password", 400));
   }
   generateAccessToken(user, res);
@@ -141,16 +142,32 @@ const resetPassword = asyncErrorWrapper(async (req, res, next) => {
     message: "Reset Password Process Success"
   });
 });
-const editDetails = asyncErrorWrapper(async (req, res, next) => {
+const editUser = asyncErrorWrapper(async (req, res, next) => {
   const editInformation = req.body;
-  const user = await User.findByIdAndUpdate(req.user.id, editInformation, {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+  if (editInformation.password) {
+    const salt = await bcrypt.genSalt(10);
+    editInformation.password = await bcrypt.hash(editInformation.password, salt);
+  }
+  const hasChanges = Object.keys(editInformation).some(field => {
+    return user[field] !== editInformation[field];
+  });
+
+  if (!hasChanges) {
+    return res.status(400).json({ success: false, message: 'No changes detected' });
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, editInformation, {
     new: true,
     runValidators: true
   });
   return res.status(200).json({
     success: true,
     message: JSON.stringify(editInformation),
-    data: user
+    data: updatedUser
   });
 });
 
@@ -162,5 +179,5 @@ module.exports = {
   imageUpload,
   //   forgotPassword,
   resetPassword,
-  editDetails
+  editUser
 };

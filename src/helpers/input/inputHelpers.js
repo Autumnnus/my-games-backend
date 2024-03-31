@@ -5,6 +5,7 @@ const validateUserInput = (email, password) => {
 };
 
 const comparePassword = (password, hashedPassword) => {
+  console.log(bcrypt.compareSync(password, hashedPassword));
   return bcrypt.compareSync(password, hashedPassword);
 };
 
