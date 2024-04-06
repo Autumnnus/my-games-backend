@@ -33,8 +33,6 @@
     "space-infix-ops": "error",
     "space-unary-ops": "error",
     //
-    "max-len": ["error", { "code": 200 }],
-    "max-lines": ["error", { "max": 500 }],
     "keyword-spacing": "error",
     "multiline-ternary": ["error", "never"],
     //

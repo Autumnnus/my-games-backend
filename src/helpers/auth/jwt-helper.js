@@ -1,5 +1,3 @@
-const jwt = require("jsonwebtoken");
-
 const generateAccessToken = (user,res) => {
   const token = user.generateJwtFromUser();
   return res

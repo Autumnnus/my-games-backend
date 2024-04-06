@@ -5,8 +5,8 @@ const {
   logout,
   //   getUser,
   //   imageUpload,
-  //   forgotPassword,
-  //   resetPassword,
+  forgotPassword,
+  resetPassword,
   editUser
 } = require("../controllers/auth");
 const { getAccessToRoute } = require("../middlewares/authorization/auth");
@@ -18,8 +18,8 @@ router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", getAccessToRoute, logout);
 // router.get("/profile", getAccessToRoute, getUser);
-// router.post("/forgotpassword", forgotPassword);
-// router.put("/resetpassword", resetPassword);
+router.post("/forgotpassword", forgotPassword);
+router.put("/resetpassword", resetPassword);
 router.put("/edit", getAccessToRoute, editUser);
 // router.post(
 //   "/upload",

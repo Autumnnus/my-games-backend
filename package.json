@@ -20,7 +20,9 @@
     "express": "^4.19.1",
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.2.3"
+    "mailgen": "^2.0.28",
+    "mongoose": "^8.2.3",
+    "nodemailer": "^6.9.13"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

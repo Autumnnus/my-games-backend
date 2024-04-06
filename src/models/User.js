@@ -23,6 +23,11 @@ const UserSchema = new Schema({
       /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
       "Please provide a valid email"
     ]
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 3600
   }
 });
 
