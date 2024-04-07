@@ -93,7 +93,6 @@ const imageUpload = asyncErrorWrapper(async (req, res, next) => {
 const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
   const resetEmail = req.body.email;
   const user = await User.findOne({ email: resetEmail });
-
   if (!user) {
     return next(new CustomError("There is no user with that e-mail."), 400);
   }
@@ -131,7 +130,7 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
         instructions: 'Click the button below to reset your password:',
         button: {
           color: '#DC4D2F',
-          text: 'To reset your password, please click the link below:',
+          text: 'Reset Password',
           link: resetPasswordUrl
         }
       },
@@ -140,7 +139,6 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
     }
   };
   const mail = MailGenerator.generate(response);
-
   const message = {
     from: process.env.SMTP_USER,
     to: resetEmail,
@@ -148,45 +146,28 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
     html: mail
   };
 
-  transporter
-    .sendMail(message)
-    .then((info) => {
-      return res.status(200).json({
-        msg: "Email Sent",
-        info: info,
-        preview: nodemailer.getTestMessageUrl(info)
+  try {
+    transporter
+      .sendMail(message)
+      .then((info) => {
+        return res.status(200).json({
+          msg: "Email Sent",
+          info: info,
+          preview: nodemailer.getTestMessageUrl(info)
+        });
       });
-    })
-    .catch((err) => {
-      return next(
-        new CustomError(
-          `Email couldn't be Sent: ${err.response}`,
-          err.responseCode
-        )
-      );
-    });
-  // try {
-  //   await sendEmail({
-  //     from: process.env.SMTP_USER,
-  //     to: resetEmail,
-  //     subject: "Reset Your Password",
-  //     html: emailTemplate
-  //   });
-  //   return res.status(200).json({
-  //     success: true,
-  //     message: "Token Sent to Your E-mail"
-  //   });
-  // } catch (err) {
-  //   user.resetPasswordToken = undefined;
-  //   user.resetPasswordExpire = undefined;
-  //   await user.save();
-  //   return next(
-  //     new CustomError(
-  //       `Email couldn't be Sent: ${err.response}`,
-  //       err.responseCode
-  //     )
-  //   );
-  // }
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    return next(
+      new CustomError(
+        `Email couldn't be Sent: ${err.response}`,
+        err.responseCode
+      )
+    );
+  }
+
 });
 
 const resetPassword = asyncErrorWrapper(async (req, res, next) => {

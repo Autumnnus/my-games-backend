@@ -28,6 +28,12 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now,
     expires: 3600
+  },
+  resetPasswordToken: {
+    type: String
+  },
+  resetPasswordExpire: {
+    type: Date
   }
 });
 
