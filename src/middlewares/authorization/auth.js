@@ -1,6 +1,8 @@
 const CustomError = require("../../helpers/errors/CustomError");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const asyncErrorWrapper = require("express-async-handler");
+const Games = require("../../models/Games");
 dotenv.config();
 
 const {
@@ -27,6 +29,24 @@ const getAccessToRoute = (req, res, next) => {
   });
 };
 
+const getGameOwnerAccess = asyncErrorWrapper(async (req, res, next) => {
+  const userId = req.user.id;
+  const gameId = req.params.id;
+
+  const game = await Games.findById(gameId);
+  console.log(game.userId.toString());
+  console.log(userId);
+  // if (question.user !== userId) {
+  //   return next(new CustomError("Only owner can handle this operation", 403));
+  // }
+
+  if (game.userId.toString() !== userId) {
+    return next(new CustomError("Only owner can handle this operation", 403));
+  }
+  next();
+});
+
 module.exports = {
-  getAccessToRoute
+  getAccessToRoute,
+  getGameOwnerAccess
 };
