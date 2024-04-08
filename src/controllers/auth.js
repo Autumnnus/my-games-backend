@@ -10,7 +10,6 @@ const {
 const { generateAccessToken } = require("../helpers/auth/jwt-helper");
 const nodemailer = require("nodemailer");
 
-
 const register = asyncErrorWrapper(async (req, res, next) => {
   const { email, name, password } = req.body;
 
@@ -96,10 +95,10 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
       intro:
         "We received a request to reset the password for your account ([User's Email Address]) with [Your Company's Name]. If you did not request this change, please ignore this email. No changes will be made to your account.",
       action: {
-        instructions: 'Click the button below to reset your password:',
+        instructions: "Click the button below to reset your password:",
         button: {
-          color: '#DC4D2F',
-          text: 'Reset Password',
+          color: "#DC4D2F",
+          text: "Reset Password",
           link: resetPasswordUrl
         }
       },
@@ -116,15 +115,13 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
   };
 
   try {
-    transporter
-      .sendMail(message)
-      .then((info) => {
-        return res.status(200).json({
-          msg: "Email Sent",
-          info: info,
-          preview: nodemailer.getTestMessageUrl(info)
-        });
+    transporter.sendMail(message).then((info) => {
+      return res.status(200).json({
+        msg: "Email Sent",
+        info: info,
+        preview: nodemailer.getTestMessageUrl(info)
       });
+    });
   } catch (err) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -136,7 +133,6 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
       )
     );
   }
-
 });
 
 const resetPassword = asyncErrorWrapper(async (req, res, next) => {
@@ -173,15 +169,27 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
   }
   //? IF NO CHANGES
   if (editInformation.email && editInformation.email === user.email) {
-    return res.status(400).json({ success: false, message: "No changes detected email" });
+    return res
+      .status(400)
+      .json({ success: false, message: "No changes detected email" });
   }
-  if (editInformation.password && comparePassword(editInformation.password, user.password)) {
-    return res.status(400).json({ success: false, message: "No changes detected password" });
+  if (
+    editInformation.password &&
+    comparePassword(editInformation.password, user.password)
+  ) {
+    return res
+      .status(400)
+      .json({ success: false, message: "No changes detected password" });
   }
-  if (editInformation.profileImage && editInformation.profileImage === user.profileImage) {
-    return res.status(400).json({ success: false, message: "No changes detected profileImage" });
+  if (
+    editInformation.profileImage &&
+    editInformation.profileImage === user.profileImage
+  ) {
+    return res
+      .status(400)
+      .json({ success: false, message: "No changes detected profileImage" });
   }
-  
+
   //? EDIT
   if (editInformation.email) {
     user.email = editInformation.email;

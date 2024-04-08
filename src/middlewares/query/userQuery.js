@@ -1,7 +1,7 @@
 const asyncErrorWrapper = require("express-async-handler");
 const { paginationHelper, searchHelper } = require("./queryHelpers");
 
-const userQueryMiddleware = function (model, options) {
+const userQueryMiddleware = function (model) {
   return asyncErrorWrapper(async function (req, res, next) {
     let query = model.find();
 

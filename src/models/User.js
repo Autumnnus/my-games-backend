@@ -4,44 +4,43 @@ const Schema = mongoose.Schema;
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-const UserSchema = new Schema({
-  name: {
-    type: String,
-    required: [true, "Please enter a name"]
+const UserSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Please enter a name"]
+    },
+    password: {
+      type: String,
+      minlength: [6, "Please enter a password with min length 6"],
+      required: [true, "Please enter a password"],
+      select: true
+    },
+    email: {
+      type: String,
+      required: [true, "Please enter an email"],
+      unique: true,
+      match: [
+        /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
+        "Please provide a valid email"
+      ]
+    },
+    resetPasswordToken: {
+      type: String
+    },
+    resetPasswordExpire: {
+      type: Date
+    },
+    profileImage: {
+      type: String
+    },
+    role: {
+      type: String,
+      default: "user",
+      enum: ["user", "admin"]
+    }
   },
-  password: {
-    type: String,
-    minlength: [6, "Please enter a password with min length 6"],
-    required: [true, "Please enter a password"],
-    select: true
-  },
-  email: {
-    type: String,
-    required: [true, "Please enter an email"],
-    unique: true,
-    match: [
-      /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/,
-      "Please provide a valid email"
-    ]
-  },
-  resetPasswordToken: {
-    type: String,
-    expires: 3600
-  },
-  resetPasswordExpire: {
-    type: Date,
-    expires: 3600
-  },
-  profileImage: {
-    type: String
-  },
-  role: {
-    type: String,
-    default: "user",
-    enum: ["user", "admin"]
-  }
-},
-{timestamps: true} 
+  { timestamps: true }
 );
 
 //* UserSchema Methods
@@ -53,7 +52,7 @@ UserSchema.methods.generateJwtFromUser = function () {
   };
 
   const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn:  "10m"
+    expiresIn: "10m"
   });
   return token;
 };

@@ -3,7 +3,10 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { getAccessTokenFromHeader, isTokenIncluded } = require("../../helpers/auth/jwt-helper");
+const {
+  getAccessTokenFromHeader,
+  isTokenIncluded
+} = require("../../helpers/auth/jwt-helper");
 
 const getAccessToRoute = (req, res, next) => {
   const accessToken = getAccessTokenFromHeader(req);
@@ -14,7 +17,7 @@ const getAccessToRoute = (req, res, next) => {
   }
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ error: 'Invalid token' });
+      return res.status(403).json({ error: "Invalid token" });
     }
     req.user = {
       id: decoded.id,
