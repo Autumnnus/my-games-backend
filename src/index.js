@@ -1,5 +1,5 @@
 const express = require("express");
-const routes = require("./routes/auth");
+const routers = require("./routes/index");
 const connectDatabase = require("./db/conn");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -11,7 +11,7 @@ connectDatabase();
 
 app.use(express.json());
 
-app.use("/api", routes);
+app.use("/api", routers);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}...`);

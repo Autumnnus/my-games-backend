@@ -1,10 +1,11 @@
 const generateAccessToken = (user,res) => {
   const token = user.generateJwtFromUser();
+  
   return res
     .status(200)
     .cookie("access_token", token, {
       httpOnly: true,
-      expires: new Date(Date.now() + parseInt("10") * 1000 * 60),
+      expires: new Date(Date.now() + parseInt(process.env.JWT_COOKIE) * 1000 * 60),
       secure: process.env.NODE_ENV === "development" ? false : true
     })
     .json({

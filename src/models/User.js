@@ -24,18 +24,27 @@ const UserSchema = new Schema({
       "Please provide a valid email"
     ]
   },
-  createdAt: {
+  createdAt: {  //If I use createdAt the file will be delete after 1 hour
     type: Date,
-    default: Date.now,
-    expires: 3600
+    default: Date.now
   },
   resetPasswordToken: {
     type: String
   },
   resetPasswordExpire: {
     type: Date
+  },
+  profileImage: {
+    type: String
+  },
+  role: {
+    type: String,
+    default: "user",
+    enum: ["user", "admin"]
   }
-});
+},
+{timestamps: true} // even If I use this, same thing will happen
+);
 
 //* UserSchema Methods
 UserSchema.methods.generateJwtFromUser = function () {
@@ -46,7 +55,7 @@ UserSchema.methods.generateJwtFromUser = function () {
   };
 
   const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: "10m"
+    expiresIn:  "10m"
   });
   return token;
 };
@@ -60,6 +69,7 @@ UserSchema.methods.getResetPasswordTokenFromUser = function () {
 
   this.resetPasswordToken = resetPasswordToken;
   this.resetPasswordExpire = Date.now() + parseInt("3600000");
+
   return resetPasswordToken;
 };
 

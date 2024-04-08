@@ -8,10 +8,8 @@ const {
   comparePassword
 } = require("../helpers/input/inputHelpers");
 const { generateAccessToken } = require("../helpers/auth/jwt-helper");
-
 const nodemailer = require("nodemailer");
 
-const sendEmail = require("../helpers/functions/sendEmail");
 
 const register = asyncErrorWrapper(async (req, res, next) => {
   const { email, name, password } = req.body;
@@ -59,35 +57,6 @@ const logout = asyncErrorWrapper(async (req, res, next) => {
       success: true,
       message: "Logout Successful"
     });
-});
-
-const getUser = (req, res, next) => {
-  res.json({
-    success: true,
-    data: {
-      id: req.user.id,
-      name: req.user.name
-    }
-  });
-};
-
-const imageUpload = asyncErrorWrapper(async (req, res, next) => {
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    {
-      profile_image: req.savedProfileImage
-    },
-    {
-      new: true,
-      runValidators: true
-    }
-  );
-
-  res.status(200).json({
-    success: true,
-    message: "Image Upload Success",
-    data: user
-  });
 });
 
 const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
@@ -202,6 +171,21 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
+  //? IF NO CHANGES
+  if (editInformation.email && editInformation.email === user.email) {
+    return res.status(400).json({ success: false, message: "No changes detected email" });
+  }
+  if (editInformation.password && comparePassword(editInformation.password, user.password)) {
+    return res.status(400).json({ success: false, message: "No changes detected password" });
+  }
+  if (editInformation.profileImage && editInformation.profileImage === user.profileImage) {
+    return res.status(400).json({ success: false, message: "No changes detected profileImage" });
+  }
+  
+  //? EDIT
+  if (editInformation.email) {
+    user.email = editInformation.email;
+  }
   if (editInformation.password) {
     const salt = await bcrypt.genSalt(10);
     editInformation.password = await bcrypt.hash(
@@ -209,14 +193,8 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
       salt
     );
   }
-  const hasChanges = Object.keys(editInformation).some((field) => {
-    return user[field] !== editInformation[field];
-  });
-
-  if (!hasChanges) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No changes detected" });
+  if (editInformation.profileImage) {
+    user.profileImage = editInformation.profileImage;
   }
 
   const updatedUser = await User.findByIdAndUpdate(
@@ -236,10 +214,8 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
 
 module.exports = {
   register,
-  getUser,
   login,
   logout,
-  imageUpload,
   resetPassword,
   forgotPassword,
   editUser
