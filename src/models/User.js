@@ -24,15 +24,13 @@ const UserSchema = new Schema({
       "Please provide a valid email"
     ]
   },
-  createdAt: {  //If I use createdAt the file will be delete after 1 hour
-    type: Date,
-    default: Date.now
-  },
   resetPasswordToken: {
-    type: String
+    type: String,
+    expires: 3600
   },
   resetPasswordExpire: {
-    type: Date
+    type: Date,
+    expires: 3600
   },
   profileImage: {
     type: String
@@ -43,7 +41,7 @@ const UserSchema = new Schema({
     enum: ["user", "admin"]
   }
 },
-{timestamps: true} // even If I use this, same thing will happen
+{timestamps: true} 
 );
 
 //* UserSchema Methods
