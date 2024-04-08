@@ -21,11 +21,19 @@ const GamesSchema = new Schema(
       enum: ["completed", "abondoned", "to_be_completed", "active_playing"]
     },
     playTime: Number,
-    screenshots: {
-      name: String,
-      url: String,
-      id: mongoose.Schema.ObjectId
-    },
+    screenshots: [
+      {
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          auto: true
+        },
+        url: {
+          type: String,
+          required: [true, "Please enter url link"]
+        },
+        name: String
+      }
+    ],
     userId: {
       type: mongoose.Schema.ObjectId,
       required: true,

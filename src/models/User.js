@@ -38,6 +38,18 @@ const UserSchema = new Schema(
       type: String,
       default: "user",
       enum: ["user", "admin"]
+    },
+    gameSize: {
+      type: Number,
+      default: 0
+    },
+    completedGameSize: {
+      type: Number,
+      default: 0
+    },
+    screenshootSize: {
+      type: Number,
+      default: 0
     }
   },
   { timestamps: true }

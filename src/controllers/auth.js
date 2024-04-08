@@ -9,6 +9,7 @@ const {
 } = require("../helpers/input/inputHelpers");
 const { generateAccessToken } = require("../helpers/auth/jwt-helper");
 const nodemailer = require("nodemailer");
+const { findUserByIdOrError } = require("../helpers/functions/findById");
 
 const register = asyncErrorWrapper(async (req, res, next) => {
   const { email, name, password } = req.body;
@@ -163,10 +164,7 @@ const resetPassword = asyncErrorWrapper(async (req, res, next) => {
 });
 const editUser = asyncErrorWrapper(async (req, res, next) => {
   const editInformation = req.body;
-  const user = await User.findById(req.user.id);
-  if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
-  }
+  const user = await findUserByIdOrError(req.user.id, next);
   //? IF NO CHANGES
   if (editInformation.email && editInformation.email === user.email) {
     return res
