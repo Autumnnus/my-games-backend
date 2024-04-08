@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const slugify = require("slugify");
 
 const GamesSchema = new Schema(
   {
@@ -21,12 +22,9 @@ const GamesSchema = new Schema(
     },
     playTime: Number,
     screenshots: {
-      name: {
-        type: String
-      },
-      url: {
-        type: String
-      }
+      name: String,
+      url: String,
+      id: mongoose.Schema.ObjectId
     },
     userId: {
       type: mongoose.Schema.ObjectId,
@@ -37,5 +35,23 @@ const GamesSchema = new Schema(
   },
   { timestamps: true }
 );
+
+GamesSchema.pre("save", function (next) {
+  if (!this.isModified("name")) {
+    next();
+  }
+  this.slug = this.makeSlug();
+  next();
+});
+
+GamesSchema.methods.makeSlug = function () {
+  return slugify(this.name, {
+    replacement: "-",
+    remove: /[*+~.()'"!:@]/g,
+    lower: true,
+    strict: false,
+    trim: true
+  });
+};
 
 module.exports = mongoose.model("Games", GamesSchema);

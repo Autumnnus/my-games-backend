@@ -2,7 +2,8 @@ const express = require("express");
 const {
   addNewGame,
   editNewGame,
-  getUserGames
+  getUserGames,
+  getUserGameDetail
 } = require("../controllers/games");
 const {
   getAccessToRoute,
@@ -15,7 +16,8 @@ const {
 const router = express.Router();
 
 router.post("/addNewGame", getAccessToRoute, addNewGame);
-router.get("/userGame/:id", getUserGames);
+router.get("/user/:id", getUserGames);
+router.get("/game/:gameId", getUserGameDetail);
 router.put(
   "/editGame/:id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],

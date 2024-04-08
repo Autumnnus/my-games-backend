@@ -52,7 +52,7 @@ UserSchema.methods.generateJwtFromUser = function () {
   };
 
   const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: "10m"
+    expiresIn: "365d"
   });
   return token;
 };
