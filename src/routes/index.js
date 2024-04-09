@@ -1,9 +1,8 @@
 const express = require("express");
-const auth = require("./auth");
-const user = require("./user");
-const games = require("./games");
+const auth = require("./sub_routes/auth");
+const user = require("./sub_routes/user");
+const games = require("./sub_routes/games");
 
-//api
 const router = express.Router();
 
 router.use("/auth", auth);

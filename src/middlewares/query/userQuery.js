@@ -6,10 +6,10 @@ const userQueryMiddleware = function (model) {
     let query = model.find();
 
     query = searchHelper("name", query, req);
-
     //*Pagination
     const total = await model.countDocuments();
     const paginationResult = await paginationHelper(total, query, req);
+    console.log(paginationResult);
     query = paginationResult.query;
     const pagination = paginationResult.pagination;
 

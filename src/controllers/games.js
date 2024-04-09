@@ -179,6 +179,23 @@ const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
+const searchUserGames = asyncErrorWrapper(async (req, res, next) => {
+  const { id } = req.params;
+  const { search } = req.query;
+  try {
+    const userGames = await Games.find({
+      userId: id,
+      name: { $regex: search, $options: "i" }
+    });
+    return res.status(200).json({
+      success: true,
+      data: userGames
+    });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
+});
+
 module.exports = {
   addNewGame,
   editNewGame,
@@ -187,5 +204,6 @@ module.exports = {
   editScreenshoot,
   deleteScreenshot,
   getUserGameDetail,
-  getUserGames
+  getUserGames,
+  searchUserGames
 };

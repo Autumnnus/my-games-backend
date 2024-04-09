@@ -6,8 +6,8 @@ const {
   forgotPassword,
   resetPassword,
   editUser
-} = require("../controllers/auth");
-const { getAccessToRoute } = require("../middlewares/authorization/auth");
+} = require("../../controllers/auth");
+const { getAccessToRoute } = require("../../middlewares/authorization/auth");
 
 const router = express.Router();
 

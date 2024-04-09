@@ -1,15 +1,15 @@
 const express = require("express");
-const User = require("../models/User");
+const User = require("../../models/User");
 const {
   getAllUsers,
   getSingleUser,
   deleteUser
-} = require("../controllers/user");
-const userQueryMiddleware = require("../middlewares/query/userQuery");
+} = require("../../controllers/user");
+const userQueryMiddleware = require("../../middlewares/query/userQuery");
 const {
   checkUserExist
-} = require("../middlewares/database/databaseErrorHelpers");
-const { getAccessToRoute } = require("../middlewares/authorization/auth");
+} = require("../../middlewares/database/databaseErrorHelpers");
+const { getAccessToRoute } = require("../../middlewares/authorization/auth");
 const router = express.Router();
 
 router.get("/", userQueryMiddleware(User), getAllUsers);

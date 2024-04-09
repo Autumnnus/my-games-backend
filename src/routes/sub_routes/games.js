@@ -7,23 +7,22 @@ const {
   getUserGameDetail,
   addScreenShoot,
   editScreenshoot,
-  deleteScreenshot
-} = require("../controllers/games");
+  deleteScreenshot,
+  searchUserGames
+} = require("../../controllers/games");
 const {
   getAccessToRoute,
   getGameOwnerAccess
-} = require("../middlewares/authorization/auth");
+} = require("../../middlewares/authorization/auth");
 const {
   checkGameExist
-} = require("../middlewares/database/databaseErrorHelpers");
-const userQueryMiddleware = require("../middlewares/query/userQuery");
-const Games = require("../models/Games");
+} = require("../../middlewares/database/databaseErrorHelpers");
 
 const router = express.Router();
 
 router.post("/addNewGame", getAccessToRoute, addNewGame);
 router.post("/:game_id/addSS", getAccessToRoute, addScreenShoot);
-router.get("/user/:id", userQueryMiddleware(Games), getUserGames);
+router.get("/user/:id", getUserGames);
 router.get("/game/:game_id", getUserGameDetail);
 router.delete(
   "/deleteGame/:id",
@@ -45,5 +44,6 @@ router.put(
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   editScreenshoot
 );
+router.get("/search/:id", searchUserGames);
 
 module.exports = router;
