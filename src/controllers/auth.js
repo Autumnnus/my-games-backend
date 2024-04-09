@@ -10,6 +10,7 @@ const {
 const { generateAccessToken } = require("../helpers/auth/jwt-helper");
 const nodemailer = require("nodemailer");
 const { findUserByIdOrError } = require("../helpers/functions/findById");
+const sendEmail = require("../helpers/functions/sendMail");
 
 const register = asyncErrorWrapper(async (req, res, next) => {
   const { email, name, password } = req.body;
@@ -65,72 +66,26 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
   if (!user) {
     return next(new CustomError("There is no user with that e-mail."), 400);
   }
+
   const resetPasswordToken = user.getResetPasswordTokenFromUser();
   await user.save();
   const resetPasswordUrl = `http://localhost:3000/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false,
-    service: "gmail",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-
-  const MailGenerator = new Mailgen({
-    theme: "salted",
-    product: {
-      name: "Mailgen",
-      link: "https://mailgen.js/"
-    }
-  });
-
-  const response = {
-    body: {
-      greeting: "Dear User",
-      intro:
-        "We received a request to reset the password for your account ([User's Email Address]) with [Your Company's Name]. If you did not request this change, please ignore this email. No changes will be made to your account.",
-      action: {
-        instructions: "Click the button below to reset your password:",
-        button: {
-          color: "#DC4D2F",
-          text: "Reset Password",
-          link: resetPasswordUrl
-        }
-      },
-      outro:
-        "Thank you for taking the time to ensure the security of your account."
-    }
-  };
-  const mail = MailGenerator.generate(response);
-  const message = {
-    from: process.env.SMTP_USER,
-    to: resetEmail,
-    subject: "Reset Password",
-    html: mail
-  };
-
   try {
-    transporter.sendMail(message).then((info) => {
-      return res.status(200).json({
-        msg: "Email Sent",
-        info: info,
-        preview: nodemailer.getTestMessageUrl(info)
-      });
+    const info = await sendEmail(
+      user,
+      "Reset Password",
+      "We received a request to reset the password for your account. If you did not request this change, please ignore this email. No changes will be made to your account.",
+      resetPasswordUrl
+    );
+
+    return res.status(200).json({
+      msg: "Email Sent",
+      info: info,
+      preview: nodemailer.getTestMessageUrl(info)
     });
   } catch (err) {
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save();
-    return next(
-      new CustomError(
-        `Email couldn't be Sent: ${err.response}`,
-        err.responseCode
-      )
-    );
+    return next(err);
   }
 });
 
@@ -160,6 +115,7 @@ const resetPassword = asyncErrorWrapper(async (req, res, next) => {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
+
 const editUser = asyncErrorWrapper(async (req, res, next) => {
   const editInformation = req.body;
   try {
@@ -220,11 +176,71 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
+const validateEmail = asyncErrorWrapper(async (req, res, next) => {
+  const resetEmail = req.body.email;
+  const user = await User.findOne({ email: resetEmail });
+  if (!user) {
+    return next(new CustomError("There is no user with that e-mail."), 400);
+  }
+  if (user.isVerified) {
+    return next(new CustomError("This user already verified"), 400);
+  }
+
+  const verificationToken = user.getVerificationTokenFromUser();
+  await user.save();
+  const verifyAccountUrl = `http://localhost:3000/api/auth/verifyAccount?verificationToken=${verificationToken}`;
+
+  try {
+    const info = await sendEmail(
+      user,
+      "Verify Account",
+      "We received a request to verify the email for your account. If you did not request this change, please ignore this email. No changes will be made to your account.",
+      verifyAccountUrl
+    );
+
+    return res.status(200).json({
+      msg: "Email Sent",
+      info: info,
+      preview: nodemailer.getTestMessageUrl(info)
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+const verifyAccount = asyncErrorWrapper(async (req, res, next) => {
+  const { verificationToken } = req.query;
+  try {
+    if (!verificationToken) {
+      return next(new CustomError("Invalid token", 400));
+    }
+    const user = await User.findOne({
+      verificationToken: verificationToken,
+      verificationExpire: { $gt: Date.now() }
+    });
+    if (!user) {
+      return next(new CustomError("Invalid Token or Session Expired", 400));
+    }
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationExpire = undefined;
+    await user.save();
+    return res.status(200).json({
+      success: true,
+      message: "Account Verification Process Success"
+    });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
+});
+
 module.exports = {
   register,
   login,
   logout,
   resetPassword,
   forgotPassword,
-  editUser
+  editUser,
+  validateEmail,
+  verifyAccount
 };

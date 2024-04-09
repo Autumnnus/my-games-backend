@@ -25,15 +25,15 @@ const UserSchema = new Schema(
         "Please provide a valid email"
       ]
     },
-    resetPasswordToken: {
-      type: String
+    isVerified: {
+      type: Boolean,
+      default: false
     },
-    resetPasswordExpire: {
-      type: Date
-    },
-    profileImage: {
-      type: String
-    },
+    verificationToken: String,
+    verificationExpire:  Date,
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+    profileImage: String,
     role: {
       type: String,
       default: "user",
@@ -62,7 +62,6 @@ UserSchema.methods.generateJwtFromUser = function () {
     id: this._id,
     name: this.name
   };
-
   const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     expiresIn: "365d"
   });
@@ -78,8 +77,19 @@ UserSchema.methods.getResetPasswordTokenFromUser = function () {
 
   this.resetPasswordToken = resetPasswordToken;
   this.resetPasswordExpire = Date.now() + parseInt("3600000");
-
   return resetPasswordToken;
+};
+
+UserSchema.methods.getVerificationTokenFromUser = function () {
+  const randomHexString = crypto.randomBytes(15).toString("hex");
+  const verificationToken = crypto
+    .createHash("SHA256")
+    .update(randomHexString)
+    .digest("hex");
+
+  this.verificationToken = verificationToken;
+  this.verificationExpire = Date.now() + parseInt("3600000");
+  return verificationToken;
 };
 
 //* Pre Hooks
