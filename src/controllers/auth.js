@@ -13,14 +13,12 @@ const { findUserByIdOrError } = require("../helpers/functions/findById");
 
 const register = asyncErrorWrapper(async (req, res, next) => {
   const { email, name, password } = req.body;
-
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return res
       .status(400)
       .json({ success: false, message: "This user already exists" });
   }
-
   if (!validateUserInput(email, password)) {
     return res
       .status(400)
@@ -36,7 +34,6 @@ const login = asyncErrorWrapper(async (req, res, next) => {
   if (!validateUserInput(email, password)) {
     return next(new CustomError("Please check your inputs", 400));
   }
-
   const user = await User.findOne({ email }).select("+password");
   if (!comparePassword(password, user.password)) {
     return next(new CustomError("Please check your password", 400));
@@ -45,18 +42,21 @@ const login = asyncErrorWrapper(async (req, res, next) => {
 });
 
 const logout = asyncErrorWrapper(async (req, res, next) => {
-  const { NODE_ENV } = process.env;
-  return res
-    .status(200)
-    .cookie({
-      httpOnly: true,
-      expires: new Date(Date.now()),
-      secure: NODE_ENV === "development" ? false : true
-    })
-    .json({
-      success: true,
-      message: "Logout Successful"
-    });
+  try {
+    return res
+      .status(200)
+      .cookie({
+        httpOnly: true,
+        expires: new Date(Date.now()),
+        secure: process.env.NODE_ENV === "development" ? false : true
+      })
+      .json({
+        success: true,
+        message: "Logout Successful"
+      });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
 });
 
 const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
@@ -65,10 +65,8 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
   if (!user) {
     return next(new CustomError("There is no user with that e-mail."), 400);
   }
-
   const resetPasswordToken = user.getResetPasswordTokenFromUser();
   await user.save();
-
   const resetPasswordUrl = `http://localhost:3000/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
 
   const transporter = nodemailer.createTransport({
@@ -139,83 +137,87 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
 const resetPassword = asyncErrorWrapper(async (req, res, next) => {
   const { resetPasswordToken } = req.query;
   const { password } = req.body;
-  if (!resetPasswordToken) {
-    return next(new CustomError("Please enter a valid token", 400));
+  try {
+    if (!resetPasswordToken) {
+      return next(new CustomError("Please enter a valid token", 400));
+    }
+    const user = await User.findOne({
+      resetPasswordToken: resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+    if (!user) {
+      return next(new CustomError("Invalid Token or Session Expired", 400));
+    }
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    return res.status(200).json({
+      success: true,
+      message: "Reset Password Process Success"
+    });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
   }
-  const user = await User.findOne({
-    resetPasswordToken: resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() }
-  });
-
-  if (!user) {
-    return next(new CustomError("Invalid Token or Session Expired", 400));
-  }
-
-  user.password = password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
-
-  await user.save();
-
-  return res.status(200).json({
-    success: true,
-    message: "Reset Password Process Success"
-  });
 });
 const editUser = asyncErrorWrapper(async (req, res, next) => {
   const editInformation = req.body;
-  const user = await findUserByIdOrError(req.user.id, next);
-  //? IF NO CHANGES
-  if (editInformation.email && editInformation.email === user.email) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No changes detected email" });
-  }
-  if (
-    editInformation.password &&
-    comparePassword(editInformation.password, user.password)
-  ) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No changes detected password" });
-  }
-  if (
-    editInformation.profileImage &&
-    editInformation.profileImage === user.profileImage
-  ) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No changes detected profileImage" });
-  }
-
-  //? EDIT
-  if (editInformation.email) {
-    user.email = editInformation.email;
-  }
-  if (editInformation.password) {
-    const salt = await bcrypt.genSalt(10);
-    editInformation.password = await bcrypt.hash(
-      editInformation.password,
-      salt
-    );
-  }
-  if (editInformation.profileImage) {
-    user.profileImage = editInformation.profileImage;
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user.id,
-    editInformation,
-    {
-      new: true,
-      runValidators: true
+  try {
+    const user = await findUserByIdOrError(req.user.id, next);
+    //? IF NO CHANGES
+    if (editInformation.email && editInformation.email === user.email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No changes detected email" });
     }
-  );
-  return res.status(200).json({
-    success: true,
-    message: JSON.stringify(editInformation),
-    data: updatedUser
-  });
+    if (
+      editInformation.password &&
+      comparePassword(editInformation.password, user.password)
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No changes detected password" });
+    }
+    if (
+      editInformation.profileImage &&
+      editInformation.profileImage === user.profileImage
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No changes detected profileImage" });
+    }
+
+    //? EDIT
+    if (editInformation.email) {
+      user.email = editInformation.email;
+    }
+    if (editInformation.password) {
+      const salt = await bcrypt.genSalt(10);
+      editInformation.password = await bcrypt.hash(
+        editInformation.password,
+        salt
+      );
+    }
+    if (editInformation.profileImage) {
+      user.profileImage = editInformation.profileImage;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      editInformation,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+    return res.status(200).json({
+      success: true,
+      message: JSON.stringify(editInformation),
+      data: updatedUser
+    });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
 });
 
 module.exports = {

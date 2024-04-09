@@ -9,7 +9,6 @@ const {
 } = require("../../helpers/auth/jwt-helper");
 dotenv.config();
 
-
 const getAccessToRoute = (req, res, next) => {
   const accessToken = getAccessTokenFromHeader(req);
   if (!isTokenIncluded(req)) {

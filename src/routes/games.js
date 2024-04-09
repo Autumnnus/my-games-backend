@@ -6,7 +6,8 @@ const {
   deleteGame,
   getUserGameDetail,
   addScreenShoot,
-  editScreenshoot,deleteScreenshot
+  editScreenshoot,
+  deleteScreenshot
 } = require("../controllers/games");
 const {
   getAccessToRoute,

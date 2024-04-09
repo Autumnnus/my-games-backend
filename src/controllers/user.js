@@ -1,27 +1,52 @@
+const CustomError = require("../helpers/errors/CustomError");
+const { findUserByIdOrError } = require("../helpers/functions/findById");
+const Games = require("../models/Games");
 const User = require("../models/User");
 const asyncErrorWrapper = require("express-async-handler");
 
 const getSingleUser = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const user = await User.findById(id);
-  return res.status(200).json({
-    success: true,
-    data: user
-  });
+  try {
+    const user = await User.findById(id);
+  
+    return res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
 });
 
 const getAllUsers = asyncErrorWrapper(async (req, res, next) => {
-  return res.status(200).json(res.queryResults);
+  try {
+    return res.status(200).json(res.queryResults);
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
 });
 
 const deleteUser = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  // await User.findByIdAndDelete(id);
-  console.log(id);
-  return res.status(200).json({
-    success: true,
-    message: "User deleted"
-  });
+  try {
+    const user = await findUserByIdOrError(req.user.id, next);
+    if (user.role !== "admin") {
+      return next(
+        new CustomError(" You are not authorized to delete this user", 404)
+      );
+    }
+    if (user.id === id) {
+      return next(new CustomError("You can not delete yourself", 400));
+    }
+    await Games.deleteMany({ userId: id });
+    await User.findByIdAndDelete(id);
+    return res.status(200).json({
+      success: true,
+      message: `User with id ${id} has been deleted`
+    });
+  } catch (error) {
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
 });
 
 module.exports = {

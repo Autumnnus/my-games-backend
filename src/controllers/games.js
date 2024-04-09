@@ -1,7 +1,10 @@
 const Games = require("../models/Games");
 const asyncErrorWrapper = require("express-async-handler");
 const CustomError = require("../helpers/errors/CustomError");
-const { findUserByIdOrError, findGameByIdOrError } = require("../helpers/functions/findById");
+const {
+  findUserByIdOrError,
+  findGameByIdOrError
+} = require("../helpers/functions/findById");
 
 const addNewGame = asyncErrorWrapper(async (req, res, next) => {
   const { status } = req.body;
@@ -22,7 +25,7 @@ const addNewGame = asyncErrorWrapper(async (req, res, next) => {
       data: game
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
@@ -31,7 +34,7 @@ const editNewGame = asyncErrorWrapper(async (req, res, next) => {
   const { name, photo, lastPlay, platform, review, rating, status, playTime } =
     req.body;
   try {
-    let game = await findGameByIdOrError(id,next);
+    let game = await findGameByIdOrError(id, next);
     const oldStatus = game.status;
     game.name = name;
     game.photo = photo;
@@ -57,14 +60,14 @@ const editNewGame = asyncErrorWrapper(async (req, res, next) => {
       data: game
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
 const deleteGame = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
   try {
-    const game = await findGameByIdOrError(id,next);
+    const game = await findGameByIdOrError(id, next);
     if (game.status === "completed") {
       const user = await findUserByIdOrError(game.userId, next);
       user.completedGameSize -= 1;
@@ -73,10 +76,10 @@ const deleteGame = asyncErrorWrapper(async (req, res, next) => {
     await Games.findByIdAndDelete(id);
     res.status(200).json({
       success: true,
-      message: `The game has been deleted ${id}`
+      message: `User with id ${id} has been deleted along with their games`
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
@@ -84,7 +87,7 @@ const addScreenShoot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
   const { name, url } = req.body;
   try {
-    const game = await findGameByIdOrError(game_id,next);
+    const game = await findGameByIdOrError(game_id, next);
     const user = await findUserByIdOrError(req.user.id, next);
     user.screenshootSize += 1;
     game.screenshots.push({ name, url });
@@ -94,7 +97,7 @@ const addScreenShoot = asyncErrorWrapper(async (req, res, next) => {
       data: game
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
@@ -102,7 +105,7 @@ const editScreenshoot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id, screenshotId } = req.params;
   const { name, url } = req.body;
   try {
-    const game = await findGameByIdOrError(game_id,next);
+    const game = await findGameByIdOrError(game_id, next);
     const updatedScreenshots = game.screenshots.map((screenshot) => {
       if (screenshot._id.toString() === screenshotId) {
         if (name) screenshot.name = name;
@@ -123,7 +126,7 @@ const editScreenshoot = asyncErrorWrapper(async (req, res, next) => {
       data: game
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
@@ -131,8 +134,10 @@ const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id, screenshotId } = req.params;
 
   try {
-    const game = await findGameByIdOrError(game_id,next);
-    const updatedScreenshots = game.screenshots.filter(screenshot => screenshot._id.toString() !== screenshotId);
+    const game = await findGameByIdOrError(game_id, next);
+    const updatedScreenshots = game.screenshots.filter(
+      (screenshot) => screenshot._id.toString() !== screenshotId
+    );
     if (updatedScreenshots.length !== game.screenshots.length) {
       game.screenshots = updatedScreenshots;
       await game.save();
@@ -157,20 +162,20 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
       data: userGames
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
 const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
   try {
-    const game = await findGameByIdOrError(game_id,next);
+    const game = await findGameByIdOrError(game_id, next);
     return res.status(200).json({
       success: true,
       data: game
     });
   } catch (error) {
-    return next(new CustomError("Internal Server Error", 404));
+    return next(new CustomError(`Error: ${error}`, 404));
   }
 });
 
