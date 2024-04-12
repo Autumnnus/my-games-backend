@@ -13,12 +13,27 @@ const GamesSchema = new Schema(
       type: Date,
       default: Date.now
     },
-    platform: String,
+    platform: {
+      type: String,
+      enum: [
+        "steam",
+        "epicGames",
+        "ubisoft",
+        "xboxPc",
+        "eaGames",
+        "torrent",
+        "playstation",
+        "xboxSeries",
+        "nintendo",
+        "mobile",
+        "otherPlatforms"
+      ]
+    },
     review: String,
     rating: Number,
     status: {
       type: String,
-      enum: ["completed", "abondoned", "to_be_completed", "active_playing"]
+      enum: ["completed", "abondoned", "toBeCompleted", "activePlaying"]
     },
     playTime: Number,
     screenshots: [

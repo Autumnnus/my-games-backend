@@ -5,7 +5,9 @@ const {
   logout,
   forgotPassword,
   resetPassword,
-  editUser,verifyAccount,validateEmail
+  editUser,
+  verifyAccount,
+  validateEmail
 } = require("../../controllers/auth");
 const { getAccessToRoute } = require("../../middlewares/authorization/auth");
 
@@ -17,7 +19,7 @@ router.get("/logout", getAccessToRoute, logout);
 router.post("/forgotpassword", forgotPassword);
 router.put("/resetpassword", resetPassword);
 router.put("/edit", getAccessToRoute, editUser);
-router.post("/validateEmail",getAccessToRoute, validateEmail);
+router.post("/validateEmail", getAccessToRoute, validateEmail);
 router.put("/verifyAccount", verifyAccount);
 
 module.exports = router;

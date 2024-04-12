@@ -30,7 +30,7 @@ const UserSchema = new Schema(
       default: false
     },
     verificationToken: String,
-    verificationExpire:  Date,
+    verificationExpire: Date,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     profileImage: String,

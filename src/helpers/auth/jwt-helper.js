@@ -11,11 +11,13 @@ const generateAccessToken = (user, res) => {
       secure: process.env.NODE_ENV === "development" ? false : true
     })
     .json({
-      success: true,
       access_token: token,
       data: {
         name: user.name,
-        email: user.email
+        email: user.email,
+        isVerified: user.isVerified,
+        role: user.role,
+        id: user._id
       }
     });
 };
