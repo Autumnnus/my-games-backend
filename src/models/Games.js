@@ -27,15 +27,25 @@ const GamesSchema = new Schema(
         "nintendo",
         "mobile",
         "otherPlatforms"
-      ]
+      ],
+      required: [true, "Please enter platform"]
     },
     review: String,
-    rating: Number,
+    rating: {
+      type: Number,
+      min: 1,
+      max: 10
+      ,required: [true, "Please enter rating"]
+    },
     status: {
       type: String,
-      enum: ["completed", "abondoned", "toBeCompleted", "activePlaying"]
+      enum: ["completed", "abondoned", "toBeCompleted", "activePlaying"],
+      required: [true, "Please enter status"]
     },
-    playTime: Number,
+    playTime: {
+      type: Number,
+      required: [true, "Please enter play time"]
+    },
     screenshots: [
       {
         _id: {
