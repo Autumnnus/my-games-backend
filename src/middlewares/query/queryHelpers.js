@@ -54,9 +54,18 @@ const paginationHelper = async (totalDocuments, query, req) => {
   };
 };
 
+const productSortHelper = (query, req) => {
+  const sortKey = req.query.sortBy;
+  if (sortKey) {
+    return query.sort(sortKey);
+  }
+  return query.sort("-createdAt");
+};
+
 module.exports = {
   searchHelper,
   populateHelper,
   questionSortHelper,
-  paginationHelper
+  paginationHelper,
+  productSortHelper
 };

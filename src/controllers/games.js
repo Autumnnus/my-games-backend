@@ -29,23 +29,26 @@ const addNewGame = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-const editNewGame = asyncErrorWrapper(async (req, res, next) => {
+const editGame = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { name, photo, lastPlay, platform, review, rating, status, playTime } =
     req.body;
   try {
     let game = await findGameByIdOrError(id, next);
-    const oldStatus = game.status;
-    game.name = name;
-    game.photo = photo;
-    game.lastPlay = lastPlay;
-    game.platform = platform;
-    game.review = review;
-    game.rating = rating;
-    game.status = status;
-    game.playTime = playTime;
+    const updatedGameFields = {
+      name,
+      photo,
+      lastPlay,
+      platform,
+      review,
+      rating,
+      status,
+      playTime
+    };
+    Object.assign(game, updatedGameFields);
     game = await game.save();
 
+    const oldStatus = game.status;
     if (oldStatus !== status) {
       const user = await findUserByIdOrError(game.userId, next);
       if (status === "completed") {
@@ -57,12 +60,16 @@ const editNewGame = asyncErrorWrapper(async (req, res, next) => {
     }
     return res.status(200).json({
       success: true,
-      data: game
+      data: {
+        _id: game._id, 
+        ...updatedGameFields 
+      }
     });
   } catch (error) {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
+
 
 const deleteGame = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
@@ -155,8 +162,26 @@ const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
 
 const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
+  const { order,sortBy } = req.query; 
+  let sortCriteria = {};
+
+  if (sortBy) {
+    if (sortBy === 'name') {
+      if (order === 'asc') {
+        sortCriteria = { name: 1 }; 
+      } else if (order === 'dsc') {
+        sortCriteria = { name: -1 };
+      }
+    } else {
+      if (order === 'asc') {
+        sortCriteria = { [sortBy]: 1 }; 
+      } else if (order === 'dsc') {
+        sortCriteria = { [sortBy]: -1 }; 
+      }
+    }
+  }
   try {
-    const userGames = await Games.find({ userId: id });
+    const userGames = await Games.find({ userId: id }).sort(sortCriteria);
     return res.status(200).json({
       success: true,
       data: userGames
@@ -165,6 +190,7 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
+
 
 const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
@@ -198,7 +224,7 @@ const searchUserGames = asyncErrorWrapper(async (req, res, next) => {
 
 module.exports = {
   addNewGame,
-  editNewGame,
+  editGame,
   deleteGame,
   addScreenShoot,
   editScreenshoot,

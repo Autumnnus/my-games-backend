@@ -1,5 +1,5 @@
 const asyncErrorWrapper = require("express-async-handler");
-const { paginationHelper, searchHelper } = require("./queryHelpers");
+const { paginationHelper, searchHelper, productSortHelper } = require("./queryHelpers");
 
 const userQueryMiddleware = function (model) {
   return asyncErrorWrapper(async function (req, res, next) {
@@ -10,9 +10,13 @@ const userQueryMiddleware = function (model) {
     const total = await model.countDocuments();
     const paginationResult = await paginationHelper(total, query, req);
     query = paginationResult.query;
+    //* Sort
+    query = productSortHelper(query, req);
     const pagination = paginationResult.pagination;
 
     const queryResults = await query;
+    console.log(queryResults);
+    console.log(queryResults.length);
     res.queryResults = {
       success: true,
       count: queryResults.length,

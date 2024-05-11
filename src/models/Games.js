@@ -31,12 +31,7 @@ const GamesSchema = new Schema(
       required: [true, "Please enter platform"]
     },
     review: String,
-    rating: {
-      type: Number,
-      min: 1,
-      max: 10
-      ,required: [true, "Please enter rating"]
-    },
+    rating: Number,
     status: {
       type: String,
       enum: ["completed", "abondoned", "toBeCompleted", "activePlaying"],

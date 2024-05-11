@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   addNewGame,
-  editNewGame,
+  editGame,
   getUserGames,
   deleteGame,
   getUserGameDetail,
@@ -17,6 +17,8 @@ const {
 const {
   checkGameExist
 } = require("../../middlewares/database/databaseErrorHelpers");
+const Games = require("../../models/Games");
+const userQueryMiddleware = require("../../middlewares/query/userQuery");
 
 const router = express.Router();
 
@@ -37,7 +39,7 @@ router.delete(
 router.put(
   "/editGame/:id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
-  editNewGame
+  editGame
 );
 router.put(
   "/:game_id/editSS/:screenshotId",
