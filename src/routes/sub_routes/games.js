@@ -17,8 +17,6 @@ const {
 const {
   checkGameExist
 } = require("../../middlewares/database/databaseErrorHelpers");
-const Games = require("../../models/Games");
-const userQueryMiddleware = require("../../middlewares/query/userQuery");
 
 const router = express.Router();
 

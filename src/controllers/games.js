@@ -61,15 +61,14 @@ const editGame = asyncErrorWrapper(async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: {
-        _id: game._id, 
-        ...updatedGameFields 
+        _id: game._id,
+        ...updatedGameFields
       }
     });
   } catch (error) {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
-
 
 const deleteGame = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
@@ -162,26 +161,23 @@ const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
 
 const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { order,sortBy } = req.query; 
+  const { order, sortBy } = req.query;
   let sortCriteria = {};
-
   if (sortBy) {
-    if (sortBy === 'name') {
-      if (order === 'asc') {
-        sortCriteria = { name: 1 }; 
-      } else if (order === 'dsc') {
-        sortCriteria = { name: -1 };
-      }
-    } else {
-      if (order === 'asc') {
-        sortCriteria = { [sortBy]: 1 }; 
-      } else if (order === 'dsc') {
-        sortCriteria = { [sortBy]: -1 }; 
-      }
-    }
+    sortCriteria = { [sortBy]: order === "asc" ? 1 : -1 };
   }
   try {
-    const userGames = await Games.find({ userId: id }).sort(sortCriteria);
+    const userGames =
+      sortBy === "screenshots" ? await Games.aggregate([
+        {
+          $addFields: {
+            arrayLength: { $size: "$screenshots" }
+          }
+        },
+        {
+          $sort: { arrayLength: order === "asc" ? 1 : -1 }
+        }
+      ]) : await Games.find({ userId: id }).sort(sortCriteria);
     return res.status(200).json({
       success: true,
       data: userGames
@@ -190,7 +186,6 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
-
 
 const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
