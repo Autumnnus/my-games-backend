@@ -7,8 +7,7 @@ const {
   getUserGameDetail,
   addScreenShoot,
   editScreenshoot,
-  deleteScreenshot,
-  searchUserGames
+  deleteScreenshot
 } = require("../../controllers/games");
 const {
   getAccessToRoute,
@@ -44,6 +43,5 @@ router.put(
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   editScreenshoot
 );
-router.get("/search/:id", searchUserGames);
 
 module.exports = router;

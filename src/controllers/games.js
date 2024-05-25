@@ -158,17 +158,28 @@ const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
     return next(new CustomError("Internal Server Error", 500));
   }
 });
-
 const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { order, sortBy } = req.query;
+  const { order, sortBy, search } = req.query;
   let sortCriteria = {};
+  const matchCriteria = { userId: id };
+
   if (sortBy) {
     sortCriteria = { [sortBy]: order === "asc" ? 1 : -1 };
   }
+
+  if (search) {
+    matchCriteria.name = { $regex: search, $options: "i" };
+  }
+
   try {
-    const userGames =
-      sortBy === "screenshots" ? await Games.aggregate([
+    let userGames;
+
+    if (sortBy === "screenshots") {
+      userGames = await Games.aggregate([
+        {
+          $match: matchCriteria
+        },
         {
           $addFields: {
             arrayLength: { $size: "$screenshots" }
@@ -177,7 +188,11 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
         {
           $sort: { arrayLength: order === "asc" ? 1 : -1 }
         }
-      ]) : await Games.find({ userId: id }).sort(sortCriteria);
+      ]);
+    } else {
+      userGames = await Games.find(matchCriteria).sort(sortCriteria);
+    }
+
     return res.status(200).json({
       success: true,
       data: userGames
@@ -186,6 +201,7 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
+
 
 const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
@@ -200,23 +216,6 @@ const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-const searchUserGames = asyncErrorWrapper(async (req, res, next) => {
-  const { id } = req.params;
-  const { search } = req.query;
-  try {
-    const userGames = await Games.find({
-      userId: id,
-      name: { $regex: search, $options: "i" }
-    });
-    return res.status(200).json({
-      success: true,
-      data: userGames
-    });
-  } catch (error) {
-    return next(new CustomError(`Error: ${error}`, 404));
-  }
-});
-
 module.exports = {
   addNewGame,
   editGame,
@@ -225,6 +224,5 @@ module.exports = {
   editScreenshoot,
   deleteScreenshot,
   getUserGameDetail,
-  getUserGames,
-  searchUserGames
+  getUserGames
 };
