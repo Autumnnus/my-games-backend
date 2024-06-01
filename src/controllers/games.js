@@ -163,22 +163,19 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   const { order, sortBy, search } = req.query;
   let sortCriteria = {};
   const matchCriteria = { userId: id };
-
   if (sortBy) {
     sortCriteria = { [sortBy]: order === "asc" ? 1 : -1 };
   }
-
   if (search) {
     matchCriteria.name = { $regex: search, $options: "i" };
   }
 
   try {
     let userGames;
-
     if (sortBy === "screenshots") {
       userGames = await Games.aggregate([
         {
-          $match: matchCriteria
+          $match: search ? matchCriteria : {}
         },
         {
           $addFields: {

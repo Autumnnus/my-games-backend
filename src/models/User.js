@@ -62,9 +62,10 @@ UserSchema.methods.generateJwtFromUser = function () {
     id: this._id,
     name: this.name
   };
-  const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: "365d"
-  });
+  // const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
+  //   expiresIn: "365d"
+  // });
+  const token = jwt.sign(payload, ACCESS_TOKEN_SECRET);
   return token;
 };
 
