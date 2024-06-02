@@ -98,9 +98,10 @@ const addScreenShoot = asyncErrorWrapper(async (req, res, next) => {
     user.screenshootSize += 1;
     game.screenshots.push({ name, url });
     await game.save();
+    const addedScreenshot = game.screenshots[game.screenshots.length - 1];
     return res.status(200).json({
       success: true,
-      data: game
+      data: addedScreenshot
     });
   } catch (error) {
     return next(new CustomError(`Error: ${error}`, 404));
@@ -120,16 +121,15 @@ const editScreenshoot = asyncErrorWrapper(async (req, res, next) => {
       return screenshot;
     });
 
-    if (updatedScreenshots !== game.screenshots) {
-      game.screenshots = updatedScreenshots;
-      await game.save();
-    } else {
+    if (updatedScreenshots === game.screenshots) {
       return next(new CustomError("Screenshot not found", 404));
     }
-
+    game.screenshots = updatedScreenshots;
+    await game.save();
+    const addedScreenshot = game.screenshots[game.screenshots.length - 1];
     return res.status(200).json({
       success: true,
-      data: game
+      data: addedScreenshot
     });
   } catch (error) {
     return next(new CustomError(`Error: ${error}`, 404));
@@ -203,15 +203,21 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
 const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
   try {
-    const game = await findGameByIdOrError(game_id, next);
+    const game = await findGameByIdOrError(game_id);
+
+    if (!game) {
+      return next(new CustomError(`Game not found with id: ${game_id}`, 404));
+    }
+
     return res.status(200).json({
       success: true,
       data: game
     });
   } catch (error) {
-    return next(new CustomError(`Error: ${error}`, 404));
+    return next(new CustomError(`Error: ${error.message}`, 500));
   }
 });
+
 
 module.exports = {
   addNewGame,
