@@ -126,6 +126,11 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "No changes detected email" });
     }
+    if (editInformation.name && editInformation.name === user.name) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No changes detected name" });
+    }
     if (
       editInformation.password &&
       comparePassword(editInformation.password, user.password)
@@ -146,6 +151,9 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
     //? EDIT
     if (editInformation.email) {
       user.email = editInformation.email;
+    }
+    if (editInformation.name) {
+      user.name = editInformation.name;
     }
     if (editInformation.password) {
       const salt = await bcrypt.genSalt(10);
