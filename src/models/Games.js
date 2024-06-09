@@ -34,7 +34,7 @@ const GamesSchema = new Schema(
     rating: Number,
     status: {
       type: String,
-      enum: ["completed", "abondoned", "toBeCompleted", "activePlaying"],
+      enum: ["completed", "abandoned", "toBeCompleted", "activePlaying"],
       required: [true, "Please enter status"]
     },
     playTime: {

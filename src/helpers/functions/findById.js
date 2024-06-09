@@ -1,6 +1,7 @@
 const User = require("../../models/User");
 const Games = require("../../models/Games");
 const CustomError = require("../errors/CustomError");
+const Screenshot = require("../../models/Screenshot");
 
 async function findUserByIdOrError(id, next) {
   const user = await User.findById(id);
@@ -16,8 +17,16 @@ async function findGameByIdOrError(id, next) {
   }
   return game;
 }
+async function findScreenshotByIdOrError(id, next) {
+  const screenshot = await Screenshot.findById(id);
+  if (!screenshot) {
+    return next(new CustomError("Screenshot not found", 404));
+  }
+  return screenshot;
+}
 
 module.exports = {
   findUserByIdOrError,
-  findGameByIdOrError
+  findGameByIdOrError,
+  findScreenshotByIdOrError
 };

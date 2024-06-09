@@ -5,8 +5,8 @@ const {
   getUserGames,
   deleteGame,
   getUserGameDetail,
-  addScreenShoot,
-  editScreenshoot,
+  addScreenShot,
+  editScreenshot,
   deleteScreenshot
 } = require("../../controllers/games");
 const {
@@ -20,7 +20,7 @@ const {
 const router = express.Router();
 
 router.post("/addNewGame", getAccessToRoute, addNewGame);
-router.post("/:game_id/addSS", getAccessToRoute, addScreenShoot);
+router.post("/:game_id/addSS", getAccessToRoute, addScreenShot);
 router.get("/user/:id", getUserGames);
 router.get("/game/:game_id", getUserGameDetail);
 router.delete(
@@ -41,7 +41,7 @@ router.put(
 router.put(
   "/:game_id/editSS/:screenshotId",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
-  editScreenshoot
+  editScreenshot
 );
 
 module.exports = router;

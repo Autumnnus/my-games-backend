@@ -89,13 +89,13 @@ const deleteGame = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-const addScreenShoot = asyncErrorWrapper(async (req, res, next) => {
+const addScreenShot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
   const { name, url } = req.body;
   try {
     const game = await findGameByIdOrError(game_id, next);
     const user = await findUserByIdOrError(req.user.id, next);
-    user.screenshootSize += 1;
+    user.ScreenshotSize += 1;
     game.screenshots.push({ name, url });
     await game.save();
     const addedScreenshot = game.screenshots[game.screenshots.length - 1];
@@ -108,7 +108,7 @@ const addScreenShoot = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-const editScreenshoot = asyncErrorWrapper(async (req, res, next) => {
+const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id, screenshotId } = req.params;
   const { name, url } = req.body;
   try {
@@ -199,7 +199,6 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-
 const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
   try {
@@ -218,13 +217,12 @@ const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-
 module.exports = {
   addNewGame,
   editGame,
   deleteGame,
-  addScreenShoot,
-  editScreenshoot,
+  addScreenShot,
+  editScreenshot,
   deleteScreenshot,
   getUserGameDetail,
   getUserGames
