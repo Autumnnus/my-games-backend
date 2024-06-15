@@ -20,7 +20,7 @@ router.get("/:game_id", getScreenshot);
 router.post(
   "/addScreenshot/:game_id",
   getAccessToRoute,
-  upload.array("file",12),
+  upload.array("file", 12),
   addScreenShot
 );
 router.delete(
@@ -30,7 +30,7 @@ router.delete(
 );
 router.put(
   "/editScreenshot/:game_id",
-  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
+  [getAccessToRoute, checkGameExist, getGameOwnerAccess], upload.single("file"),
   editScreenshot
 );
 

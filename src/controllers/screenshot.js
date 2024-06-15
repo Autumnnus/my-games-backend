@@ -6,7 +6,7 @@ const {
   findScreenshotByIdOrError
 } = require("../helpers/functions/findById");
 const Screenshot = require("../models/Screenshot");
-const { s3Uploadv2 } = require("../../s3Service");
+const { s3Uploadv2, s3Updatev2 } = require("../../s3Service");
 
 // const addScreenShot = asyncErrorWrapper(async (req, res, next) => {
 //   const { game_id } = req.params;
@@ -36,39 +36,9 @@ const { s3Uploadv2 } = require("../../s3Service");
 //   }
 // });
 
-// const addScreenShot = async (req, res, next) => {
-//   const { game_id } = req.params;
-//   const { name } = req.body;
-//   if (!req.file) {
-//     return next(new CustomError("No file uploaded", 400));
-//   }
-//   console.log(req.file,"req.file");
-//   const fileUrl = await s3Uploadv2(req.file);
-//   try {
-//     const game = await findGameByIdOrError(game_id, next);
-//     const screenshot = await Screenshot.create({
-//       name,
-//       url: fileUrl,
-//       user: req.user.id,
-//       game: {
-//         name: game.name,
-//         _id: game_id
-//       }
-//     });
-//     await screenshot.save();
-//     return res.status(200).json({
-//       success: true,
-//       data: screenshot
-//     });
-//   } catch (error) {
-//     return next(new CustomError(`Error: ${error}`, 500));
-//   }
-// };
-
 const addScreenShot = async (req, res, next) => {
   const { game_id } = req.params;
   const { name } = req.body;
-  console.log(req,"req.file");
   if (!req.files || req.files.length === 0) {
     return next(new CustomError("No file uploaded", 400));
   }
@@ -99,34 +69,63 @@ const addScreenShot = async (req, res, next) => {
   }
 };
 
-
 const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
-  const { game_id, screenshotId } = req.params;
-  const { name, url } = req.body;
+  const { game_id } = req.params;
+  const { name } = req.body;
+  if (!req.file) {
+    return next(new CustomError("No file uploaded", 400));
+  }
   try {
+    const fileUrl = await s3Updatev2(
+      "19cd7c1a-1e95-4f18-9922-39c95ca53f9b-Screenshot 2024-06-11 233651.png",
+      req.file
+    );
+    console.log(fileUrl, "fileUrl");
     const game = await findGameByIdOrError(game_id, next);
-    const updatedScreenshots = game.screenshots.map((screenshot) => {
-      if (screenshot._id.toString() === screenshotId) {
-        if (name) screenshot.name = name;
-        if (url) screenshot.url = url;
+    const screenshot = await Screenshot.updateOne({
+      name,
+      url: fileUrl,
+      user: req.user.id,
+      game: {
+        name: game.name,
+        _id: game_id
       }
-      return screenshot;
     });
-
-    if (updatedScreenshots === game.screenshots) {
-      return next(new CustomError("Screenshot not found", 404));
-    }
-    game.screenshots = updatedScreenshots;
-    await game.save();
-    const addedScreenshot = game.screenshots[game.screenshots.length - 1];
     return res.status(200).json({
       success: true,
-      data: addedScreenshot
+      data: screenshot
     });
   } catch (error) {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
+// const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
+//   const { game_id, screenshotId } = req.params;
+//   const { name, url } = req.body;
+//   try {
+//     const game = await findGameByIdOrError(game_id, next);
+//     const updatedScreenshots = game.screenshots.map((screenshot) => {
+//       if (screenshot._id.toString() === screenshotId) {
+//         if (name) screenshot.name = name;
+//         if (url) screenshot.url = url;
+//       }
+//       return screenshot;
+//     });
+
+//     if (updatedScreenshots === game.screenshots) {
+//       return next(new CustomError("Screenshot not found", 404));
+//     }
+//     game.screenshots = updatedScreenshots;
+//     await game.save();
+//     const addedScreenshot = game.screenshots[game.screenshots.length - 1];
+//     return res.status(200).json({
+//       success: true,
+//       data: addedScreenshot
+//     });
+//   } catch (error) {
+//     return next(new CustomError(`Error: ${error}`, 404));
+//   }
+// });
 
 const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id, screenshotId } = req.params;

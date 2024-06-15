@@ -1,5 +1,3 @@
-const { PutObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3 } = require("aws-sdk");
 const uuid = require("uuid").v4;
 const dotenv = require("dotenv");
@@ -28,4 +26,35 @@ exports.s3Uploadv2 = async (file) => {
   };
   const uploadResult = await s3.upload(params).promise();
   return uploadResult.Location;
+};
+
+exports.s3Deletev2 = async (key) => {
+  const params = {
+    Bucket: bucketName,
+    Key: key
+  };
+
+  try {
+    await s3.deleteObject(params).promise();
+    return { success: true, message: "File deleted successfully" };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+exports.s3Updatev2 = async (key, file) => {
+  const params = {
+    ACL: "public-read-write",
+    Bucket: bucketName,
+    Key: key,
+    Body: file.buffer,
+    ContentType: file.mimetype
+  };
+
+  try {
+    const uploadResult = await s3.upload(params).promise();
+    return uploadResult.Location;
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };

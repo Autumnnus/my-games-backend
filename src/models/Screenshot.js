@@ -10,8 +10,9 @@ const ScreenshotSchema = new Schema(
     },
     url: {
       type: String,
-      required: [true, "Please enter url link"]
+      required: [true, "Photo is required"]
     },
+    thumbnail: String,
     user: {
       type: mongoose.Schema.ObjectId,
       required: true,
