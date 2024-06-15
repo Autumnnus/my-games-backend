@@ -17,7 +17,12 @@ const upload = require("../../helpers/functions/multer");
 const router = express.Router();
 
 router.get("/:game_id", getScreenshot);
-router.post("/addScreenshot/:game_id", getAccessToRoute, upload.single('file'), addScreenShot);
+router.post(
+  "/addScreenshot/:game_id",
+  getAccessToRoute,
+  upload.array("file",12),
+  addScreenShot
+);
 router.delete(
   "/deleteScreenshot/:game_id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],

@@ -2,9 +2,11 @@ const asyncErrorWrapper = require("express-async-handler");
 const CustomError = require("../helpers/errors/CustomError");
 const {
   findUserByIdOrError,
-  findGameByIdOrError,findScreenshotByIdOrError
+  findGameByIdOrError,
+  findScreenshotByIdOrError
 } = require("../helpers/functions/findById");
 const Screenshot = require("../models/Screenshot");
+const { s3Uploadv2 } = require("../../s3Service");
 
 // const addScreenShot = asyncErrorWrapper(async (req, res, next) => {
 //   const { game_id } = req.params;
@@ -34,40 +36,69 @@ const Screenshot = require("../models/Screenshot");
 //   }
 // });
 
+// const addScreenShot = async (req, res, next) => {
+//   const { game_id } = req.params;
+//   const { name } = req.body;
+//   if (!req.file) {
+//     return next(new CustomError("No file uploaded", 400));
+//   }
+//   console.log(req.file,"req.file");
+//   const fileUrl = await s3Uploadv2(req.file);
+//   try {
+//     const game = await findGameByIdOrError(game_id, next);
+//     const screenshot = await Screenshot.create({
+//       name,
+//       url: fileUrl,
+//       user: req.user.id,
+//       game: {
+//         name: game.name,
+//         _id: game_id
+//       }
+//     });
+//     await screenshot.save();
+//     return res.status(200).json({
+//       success: true,
+//       data: screenshot
+//     });
+//   } catch (error) {
+//     return next(new CustomError(`Error: ${error}`, 500));
+//   }
+// };
+
 const addScreenShot = async (req, res, next) => {
   const { game_id } = req.params;
   const { name } = req.body;
-  console.log("######################################################");
-  console.log("FILE:",req.file);
-  console.log("######################################################");
-  if (!req.file) {
-    return next(new CustomError('No file uploaded', 400));
+  console.log(req,"req.file");
+  if (!req.files || req.files.length === 0) {
+    return next(new CustomError("No file uploaded", 400));
   }
-
-  const fileUrl = `/uploads/${req.file.filename}`; // Assuming you're serving the files from the uploads folder
-
   try {
-    const game = await findGameByIdOrError(game_id, next); // Implement this helper to find the game by ID or throw an error
-    const screenshot = await Screenshot.create({
-      name,
-      url: fileUrl,
-      user: req.user.id,
-      game: {
-        name: game.name,
-        _id: game_id
-      }
-    });
+    const game = await findGameByIdOrError(game_id, next);
+    const screenshots = [];
 
-    await screenshot.save();
+    for (const file of req.files) {
+      const fileUrl = await s3Uploadv2(file);
+      const screenshot = await Screenshot.create({
+        name,
+        url: fileUrl,
+        user: req.user.id,
+        game: {
+          name: game.name,
+          _id: game_id
+        }
+      });
+      screenshots.push(screenshot);
+    }
 
     return res.status(200).json({
       success: true,
-      data: screenshot
+      data: screenshots
     });
   } catch (error) {
     return next(new CustomError(`Error: ${error}`, 500));
   }
 };
+
 
 const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id, screenshotId } = req.params;
