@@ -13,6 +13,7 @@ const ScreenshotSchema = new Schema(
       required: [true, "Photo is required"]
     },
     thumbnail: String,
+    key: String,
     user: {
       type: mongoose.Schema.ObjectId,
       required: true,
@@ -29,7 +30,7 @@ const ScreenshotSchema = new Schema(
         required: true
       }
     },
-    status: {
+    type: {
       type: String,
       enum: ["text", "image"],
       required: [true, "Please enter a type"]

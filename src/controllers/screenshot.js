@@ -38,57 +38,100 @@ const { s3Uploadv2, s3Updatev2 } = require("../../s3Service");
 
 const addScreenShot = async (req, res, next) => {
   const { game_id } = req.params;
-  const { name } = req.body;
+  const { name, type, url } = req.body;
+  const game = await findGameByIdOrError(game_id, next);
   if (!req.files || req.files.length === 0) {
     return next(new CustomError("No file uploaded", 400));
   }
-  try {
-    const game = await findGameByIdOrError(game_id, next);
-    const screenshots = [];
-
-    for (const file of req.files) {
-      const fileUrl = await s3Uploadv2(file);
+  console.log(type === "image");
+  if (type === "text") {
+    try {
       const screenshot = await Screenshot.create({
         name,
-        url: fileUrl,
+        url,
         user: req.user.id,
         game: {
           name: game.name,
           _id: game_id
         },
-        type: "image"
+        type: "text"
       });
-      screenshots.push(screenshot);
+      return res.status(200).json({
+        success: true,
+        data: screenshot
+      });
+    } catch (error) {
+      return next(new CustomError(`Error: ${error}`, 500));
     }
+  } else if (type === "image") {
+    try {
+      const screenshots = [];
+      for (const file of req.files) {
+        const awsFile = await s3Uploadv2(file);
+        const screenshot = await Screenshot.create({
+          name,
+          url: awsFile.Location,
+          user: req.user.id,
+          key: awsFile.key,
+          game: {
+            name: game.name,
+            _id: game_id
+          },
+          type: "image"
+        });
+        screenshots.push(screenshot);
+      }
 
-    return res.status(200).json({
-      success: true,
-      data: screenshots
-    });
-  } catch (error) {
-    return next(new CustomError(`Error: ${error}`, 500));
+      return res.status(200).json({
+        success: true,
+        data: screenshots
+      });
+    } catch (error) {
+      return next(new CustomError(`Error: ${error}`, 500));
+    }
+  } else {
+    return next(new CustomError(`${type} - Invalid Type`, 400));
   }
 };
 
 const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id } = req.params;
-  const { name, type } = req.body;
+  const { name, type, url, id } = req.body;
+  const game = await findGameByIdOrError(game_id, next);
+  const screenshot = await findScreenshotByIdOrError(id, next);
   if (!req.file) {
     return next(new CustomError("No file uploaded", 400));
   }
+  if (!game) {
+    return next(new CustomError("Game not found", 404));
+  }
+  if (!screenshot) {
+    return next(new CustomError("Screenshot not found", 404));
+  }
   if (type === "text") {
-    return next(new CustomError("Please upload an image", 400));
-  } else if (type !== "image") {
     try {
-      const fileUrl = await s3Updatev2(
-        "19cd7c1a-1e95-4f18-9922-39c95ca53f9b-Screenshot 2024-06-11 233651.png",
-        req.file
-      );
-      console.log(fileUrl, "fileUrl");
-      const game = await findGameByIdOrError(game_id, next);
+      const updatedScreenshot = await Screenshot.updateOne({
+        name,
+        url,
+        user: req.user.id,
+        game: {
+          name: game.name,
+          _id: game_id
+        }
+      });
+      return res.status(200).json({
+        success: true,
+        data: updatedScreenshot
+      });
+    } catch (error) {
+      return next(new CustomError(`Error: ${error}`, 404));
+    }
+  } else if (type === "image") {
+    try {
+      const awsFile = await s3Updatev2(screenshot.key, req.file);
       const screenshot = await Screenshot.updateOne({
         name,
-        url: fileUrl,
+        url: awsFile.Location,
         user: req.user.id,
         game: {
           name: game.name,

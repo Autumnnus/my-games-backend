@@ -20,13 +20,13 @@ exports.s3Uploadv2 = async (file) => {
   const params = {
     ACL: "public-read-write",
     Bucket: bucketName,
-    Key: `uploads/${uuid()}-${file.originalname}`,
+    Key: `${uuid()}-${file.originalname}`,
     Body: file.buffer,
     ContentType: file.mimetype
   };
   try {
     const uploadResult = await s3.upload(params).promise();
-    return uploadResult.Location;
+    return uploadResult;
   } catch (error) {
     return { success: false, message: error.message };
   }
@@ -55,14 +55,14 @@ exports.s3Updatev2 = async (key, file) => {
   const params = {
     ACL: "public-read-write",
     Bucket: bucketName,
-    Key: `uploads/${key}`,
+    Key: key,
     Body: file.buffer,
     ContentType: file.mimetype
   };
 
   try {
     const uploadResult = await s3.upload(params).promise();
-    return uploadResult.Location;
+    return uploadResult;
   } catch (error) {
     return { success: false, message: error.message };
   }
