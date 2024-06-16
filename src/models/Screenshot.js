@@ -29,6 +29,11 @@ const ScreenshotSchema = new Schema(
         required: true
       }
     },
+    status: {
+      type: String,
+      enum: ["text", "image"],
+      required: [true, "Please enter a type"]
+    },
     date: Date
   },
   { timestamps: true }

@@ -24,8 +24,12 @@ exports.s3Uploadv2 = async (file) => {
     Body: file.buffer,
     ContentType: file.mimetype
   };
-  const uploadResult = await s3.upload(params).promise();
-  return uploadResult.Location;
+  try {
+    const uploadResult = await s3.upload(params).promise();
+    return uploadResult.Location;
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
 exports.s3Deletev2 = async (key) => {
@@ -43,10 +47,15 @@ exports.s3Deletev2 = async (key) => {
 };
 
 exports.s3Updatev2 = async (key, file) => {
+  const deleteResponse = await exports.s3Deletev2(key);
+  if (!deleteResponse.success) {
+    return deleteResponse;
+  }
+
   const params = {
     ACL: "public-read-write",
     Bucket: bucketName,
-    Key: key,
+    Key: `uploads/${key}`,
     Body: file.buffer,
     ContentType: file.mimetype
   };

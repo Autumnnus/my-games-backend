@@ -30,7 +30,8 @@ router.delete(
 );
 router.put(
   "/editScreenshot/:game_id",
-  [getAccessToRoute, checkGameExist, getGameOwnerAccess], upload.single("file"),
+  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
+  upload.single("file"),
   editScreenshot
 );
 
