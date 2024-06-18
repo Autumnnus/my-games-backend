@@ -5,8 +5,8 @@ const {
   logout,
   forgotPassword,
   resetPassword,
-  editUser,
   verifyAccount,
+  editUser,
   validateEmail
 } = require("../../controllers/auth");
 const { getAccessToRoute } = require("../../middlewares/authorization/auth");

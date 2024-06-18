@@ -115,15 +115,16 @@ const resetPassword = asyncErrorWrapper(async (req, res, next) => {
 });
 
 const editUser = asyncErrorWrapper(async (req, res, next) => {
+  console.log("çalıştı");
   const editInformation = req.body;
   try {
     const user = await findUserByIdOrError(req.user.id, next);
     //? IF NO CHANGES
-    if (editInformation.email && editInformation.email === user.email) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No changes detected email" });
-    }
+    // if (editInformation.email && editInformation.email === user.email) {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, message: "No changes detected email" });
+    // }
     if (editInformation.name && editInformation.name === user.name) {
       return res
         .status(400)
@@ -145,11 +146,12 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "No changes detected profileImage" });
     }
-
+    console.log("editpassword", editInformation.password);
+    console.log("user password", user.password);
     //? EDIT
-    if (editInformation.email) {
-      user.email = editInformation.email;
-    }
+    // if (editInformation.email) {
+    //   user.email = editInformation.email;
+    // }
     if (editInformation.name) {
       user.name = editInformation.name;
     }
