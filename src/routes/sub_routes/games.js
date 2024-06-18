@@ -4,10 +4,7 @@ const {
   editGame,
   getUserGames,
   deleteGame,
-  getUserGameDetail,
-  addScreenShot,
-  editScreenshot,
-  deleteScreenshot
+  getUserGameDetail
 } = require("../../controllers/games");
 const {
   getAccessToRoute,
@@ -19,29 +16,18 @@ const {
 
 const router = express.Router();
 
-router.post("/addNewGame", getAccessToRoute, addNewGame);
-router.post("/:game_id/addSS", getAccessToRoute, addScreenShot);
+router.post("/add", getAccessToRoute, addNewGame);
 router.get("/user/:id", getUserGames);
 router.get("/game/:game_id", getUserGameDetail);
 router.delete(
-  "/deleteGame/:id",
+  "/delete/:id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   deleteGame
 );
-router.delete(
-  "/:game_id/deleteSS/:screenshotId",
-  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
-  deleteScreenshot
-);
 router.put(
-  "/editGame/:id",
+  "/edit/:id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   editGame
-);
-router.put(
-  "/:game_id/editSS/:screenshotId",
-  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
-  editScreenshot
 );
 
 module.exports = router;

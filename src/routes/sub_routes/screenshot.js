@@ -7,9 +7,11 @@ const {
 } = require("../../controllers/screenshot");
 const {
   getAccessToRoute,
+  getGameSSOwnerAccess,
   getGameOwnerAccess
 } = require("../../middlewares/authorization/auth");
 const {
+  checkGameSSExist,
   checkGameExist
 } = require("../../middlewares/database/databaseErrorHelpers");
 const upload = require("../../helpers/functions/multer");
@@ -18,19 +20,19 @@ const router = express.Router();
 
 router.get("/:game_id", getScreenshot);
 router.post(
-  "/addScreenshot/:game_id",
-  getAccessToRoute,
-  upload.array("file", 12),
+  "/add/:game_id",
+  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
+  upload.array("file", 50),
   addScreenShot
 );
 router.delete(
-  "/deleteScreenshot/:game_id",
-  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
+  "/delete/:game_id/:screenshot_id",
+  [getAccessToRoute, checkGameSSExist, getGameSSOwnerAccess],
   deleteScreenshot
 );
 router.put(
-  "/editScreenshot/:game_id",
-  [getAccessToRoute, checkGameExist, getGameOwnerAccess],
+  "/edit/:game_id",
+  [getAccessToRoute, checkGameSSExist, getGameSSOwnerAccess],
   upload.single("file"),
   editScreenshot
 );

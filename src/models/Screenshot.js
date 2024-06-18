@@ -20,15 +20,9 @@ const ScreenshotSchema = new Schema(
       ref: "User"
     },
     game: {
-      name: {
-        type: String,
-        required: true
-      },
-      _id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Games",
-        required: true
-      }
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Games",
+      required: true
     },
     type: {
       type: String,

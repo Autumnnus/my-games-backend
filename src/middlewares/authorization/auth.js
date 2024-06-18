@@ -7,6 +7,7 @@ const {
   getAccessTokenFromHeader,
   isTokenIncluded
 } = require("../../helpers/auth/jwt-helper");
+const Screenshot = require("../../models/Screenshot");
 dotenv.config();
 
 const getAccessToRoute = (req, res, next) => {
@@ -28,7 +29,7 @@ const getAccessToRoute = (req, res, next) => {
   });
 };
 
-const getGameOwnerAccess = asyncErrorWrapper(async (req, res, next) => {
+const getGameOwnerAccess = asyncErrorWrapper(async (req, _, next) => {
   const userId = req.user.id;
   const gameId = req.params.id || req.params.game_id;
   const game = await Games.findById(gameId);
@@ -38,7 +39,22 @@ const getGameOwnerAccess = asyncErrorWrapper(async (req, res, next) => {
   next();
 });
 
+const getGameSSOwnerAccess = asyncErrorWrapper(async (req, _, next) => {
+  const userId = req.user.id;
+  const gameId = req.params.id || req.params.game_id;
+  const game = await Games.findById(gameId);
+  const screenshoot = await Screenshot.findById(req.params.screenshot_id);
+  if (game.userId.toString() !== userId) {
+    return next(new CustomError("Only owner can handle this operation", 403));
+  }
+  if (screenshoot.user.toString() !== userId) {
+    return next(new CustomError("Only owner can handle this operation", 403));
+  }
+  next();
+});
+
 module.exports = {
   getAccessToRoute,
-  getGameOwnerAccess
+  getGameOwnerAccess,
+  getGameSSOwnerAccess
 };

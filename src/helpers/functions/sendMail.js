@@ -5,16 +5,12 @@ const Mailgen = require("mailgen");
 const sendEmail = async (user, subject, content, url) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: false,
       service: process.env.SMTP_SERVICE,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
       }
     });
-
     const MailGenerator = new Mailgen({
       theme: "salted",
       product: {
@@ -42,7 +38,7 @@ const sendEmail = async (user, subject, content, url) => {
 
     const mail = MailGenerator.generate(response);
     const message = {
-      from: process.env.SMTP_USER,
+      from: `My Games ${process.env.SMTP_USER}`,
       to: user.email,
       subject: subject,
       html: mail

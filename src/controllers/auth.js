@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const CustomError = require("../helpers/errors/CustomError");
 const bcrypt = require("bcryptjs");
-const Mailgen = require("mailgen");
 const asyncErrorWrapper = require("express-async-handler");
 const {
   validateUserInput,
@@ -26,7 +25,6 @@ const register = asyncErrorWrapper(async (req, res, next) => {
       .json({ success: false, message: "Please check your inputs" });
   }
   const newUser = await User.create({ email, name, password });
-
   generateAccessToken(newUser, res);
 });
 
@@ -61,15 +59,15 @@ const logout = asyncErrorWrapper(async (req, res, next) => {
 });
 
 const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
-  const resetEmail = req.body.email;
-  const user = await User.findOne({ email: resetEmail });
+  const email = req.body.email;
+  const user = await User.findOne({ email });
   if (!user) {
     return next(new CustomError("There is no user with that e-mail."), 400);
   }
 
   const resetPasswordToken = user.getResetPasswordTokenFromUser();
   await user.save();
-  const resetPasswordUrl = `http://localhost:3000/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
+  const resetPasswordUrl = `http://localhost:3001/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
 
   try {
     const info = await sendEmail(
@@ -196,7 +194,7 @@ const validateEmail = asyncErrorWrapper(async (req, res, next) => {
 
   const verificationToken = user.getVerificationTokenFromUser();
   await user.save();
-  const verifyAccountUrl = `http://localhost:3000/api/auth/verifyAccount?verificationToken=${verificationToken}`;
+  const verifyAccountUrl = `http://localhost:3001/api/auth/verifyAccount?verificationToken=${verificationToken}`;
 
   try {
     const info = await sendEmail(
