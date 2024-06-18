@@ -8,7 +8,6 @@ const getSingleUser = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
   try {
     const user = await User.findById(id);
-
     return res.status(200).json({
       success: true,
       data: user
@@ -18,7 +17,7 @@ const getSingleUser = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-const getAllUsers = asyncErrorWrapper(async (req, res, next) => {
+const getAllUsers = asyncErrorWrapper(async (_, res, next) => {
   try {
     const users = await User.find();
     return res.status(200).json({

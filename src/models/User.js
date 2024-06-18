@@ -47,7 +47,7 @@ const UserSchema = new Schema(
       type: Number,
       default: 0
     },
-    ScreenshotSize: {
+    screenshotSize: {
       type: Number,
       default: 0
     }

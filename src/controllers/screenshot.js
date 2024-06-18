@@ -13,6 +13,7 @@ const addScreenShot = async (req, res, next) => {
   const user = await findUserByIdOrError(req.user.id, next);
   const role = user.role;
   const { name, type, url } = req.body;
+  const userScreenshots = await Screenshot.find({ user: req.user.id });
   if (!req.files || req.files.length === 0) {
     return next(new CustomError("No file uploaded", 400));
   }
@@ -25,6 +26,8 @@ const addScreenShot = async (req, res, next) => {
         game: game_id,
         type: "text"
       });
+      user.screenshotSize = userScreenshots.length + 1;
+      await user.save();
       return res.status(200).json({
         success: true,
         data: screenshot
@@ -51,6 +54,8 @@ const addScreenShot = async (req, res, next) => {
           type: "image"
         });
         screenshots.push(screenshot);
+        user.screenshotSize = userScreenshots.length + req.files.length;
+        await user.save();
       }
       return res.status(200).json({
         success: true,
@@ -126,8 +131,12 @@ const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
 const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
   const { game_id, screenshot_id } = req.params;
   const screenshot = await findScreenshotByIdOrError(screenshot_id, next);
+  const user = await findUserByIdOrError(req.user.id, next);
+  const userScreenshots = await Screenshot.find({ user: req.user.id });
   await s3Deletev2(screenshot.key, req.file);
   await Screenshot.findByIdAndDelete(screenshot_id);
+  user.screenshotSize = userScreenshots.length + 1;
+  await user.save();
   return res.status(200).json({
     success: true,
     message: `Screenshot ${screenshot_id} has been deleted from game ${game_id}`

@@ -43,11 +43,11 @@ const getGameSSOwnerAccess = asyncErrorWrapper(async (req, _, next) => {
   const userId = req.user.id;
   const gameId = req.params.id || req.params.game_id;
   const game = await Games.findById(gameId);
-  const screenshoot = await Screenshot.findById(req.params.screenshot_id);
+  const screenshot = await Screenshot.findById(req.params.screenshot_id);
   if (game.userId.toString() !== userId) {
     return next(new CustomError("Only owner can handle this operation", 403));
   }
-  if (screenshoot.user.toString() !== userId) {
+  if (screenshot.user.toString() !== userId) {
     return next(new CustomError("Only owner can handle this operation", 403));
   }
   next();
