@@ -28,8 +28,7 @@ const ScreenshotSchema = new Schema(
       type: String,
       enum: ["text", "image"],
       required: [true, "Please enter a type"]
-    },
-    date: Date
+    }
   },
   { timestamps: true }
 );

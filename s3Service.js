@@ -31,13 +31,11 @@ exports.s3Uploadv2 = async (file) => {
     return { success: false, message: error.message };
   }
 };
-
 exports.s3Deletev2 = async (key) => {
   const params = {
     Bucket: bucketName,
     Key: key
   };
-
   try {
     await s3.deleteObject(params).promise();
     return { success: true, message: "File deleted successfully" };
@@ -51,7 +49,6 @@ exports.s3Updatev2 = async (key, file) => {
   if (!deleteResponse.success) {
     return deleteResponse;
   }
-
   const params = {
     ACL: "public-read-write",
     Bucket: bucketName,
@@ -59,7 +56,6 @@ exports.s3Updatev2 = async (key, file) => {
     Body: file.buffer,
     ContentType: file.mimetype
   };
-
   try {
     const uploadResult = await s3.upload(params).promise();
     return uploadResult;

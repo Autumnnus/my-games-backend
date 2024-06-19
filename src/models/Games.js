@@ -41,19 +41,10 @@ const GamesSchema = new Schema(
       type: Number,
       required: [true, "Please enter play time"]
     },
-    screenshots: [
-      {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          auto: true
-        },
-        url: {
-          type: String,
-          required: [true, "Please enter url link"]
-        },
-        name: String
-      }
-    ],
+    screenshotSize: {
+      type: Number,
+      default: 0
+    },
     userId: {
       type: mongoose.Schema.ObjectId,
       required: true,

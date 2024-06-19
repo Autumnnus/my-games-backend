@@ -21,7 +21,6 @@ const addNewGame = asyncErrorWrapper(async (req, res, next) => {
     }
     user.gameSize = userGames.length + 1;
     await user.save();
-    console.log(user.gameSize, "2.game size");
     return res.status(200).json({
       success: true,
       data: game
@@ -110,25 +109,25 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   }
 
   try {
-    let userGames;
-    if (sortBy === "screenshots") {
-      userGames = await Games.aggregate([
-        {
-          $match: search ? matchCriteria : {}
-        },
-        {
-          $addFields: {
-            arrayLength: { $size: "$screenshots" }
-          }
-        },
-        {
-          $sort: { arrayLength: order === "asc" ? 1 : -1 }
-        }
-      ]);
-    } else {
-      userGames = await Games.find(matchCriteria).sort(sortCriteria);
-    }
-
+    // let userGames;
+    // if (sortBy === "screenshots") {
+    //   userGames = await Games.aggregate([
+    //     {
+    //       $match: search ? matchCriteria : {}
+    //     },
+    //     {
+    //       $addFields: {
+    //         arrayLength: { $size: "$screenshots" }
+    //       }
+    //     },
+    //     {
+    //       $sort: { arrayLength: order === "asc" ? 1 : -1 }
+    //     }
+    //   ]);
+    // } else {
+    //   userGames = await Games.find(matchCriteria).sort(sortCriteria);
+    // }
+    const  userGames = await Games.find(matchCriteria).sort(sortCriteria);
     return res.status(200).json({
       success: true,
       data: userGames
