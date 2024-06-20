@@ -26,6 +26,7 @@ const addNewGame = asyncErrorWrapper(async (req, res, next) => {
       data: game
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -70,6 +71,7 @@ const editGame = asyncErrorWrapper(async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -93,6 +95,7 @@ const deleteGame = asyncErrorWrapper(async (req, res, next) => {
       message: `User with id ${id} has been deleted along with their games`
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -127,12 +130,13 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
     // } else {
     //   userGames = await Games.find(matchCriteria).sort(sortCriteria);
     // }
-    const  userGames = await Games.find(matchCriteria).sort(sortCriteria);
+    const userGames = await Games.find(matchCriteria).sort(sortCriteria);
     return res.status(200).json({
       success: true,
       data: userGames
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -151,6 +155,7 @@ const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
       data: game
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error.message}`, 500));
   }
 });

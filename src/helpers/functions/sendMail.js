@@ -52,6 +52,7 @@ const sendEmail = async (user, subject, content, url) => {
     user.verificationToken = undefined;
     user.verificationExpire = undefined;
     await user.save();
+    console.error("ERROR: ", err);
     throw new CustomError(
       `Email couldn't be Sent: ${err.response}`,
       err.responseCode

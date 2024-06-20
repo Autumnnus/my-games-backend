@@ -13,6 +13,7 @@ const getSingleUser = asyncErrorWrapper(async (req, res, next) => {
       data: user
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -25,6 +26,7 @@ const getAllUsers = asyncErrorWrapper(async (_, res, next) => {
       data: users
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -48,6 +50,7 @@ const deleteUser = asyncErrorWrapper(async (req, res, next) => {
       message: `User with id ${id} has been deleted`
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });

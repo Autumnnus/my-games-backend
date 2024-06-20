@@ -37,6 +37,7 @@ const addScreenShot = async (req, res, next) => {
         data: screenshot
       });
     } catch (error) {
+      console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 500));
     }
   } else if (type === "image") {
@@ -68,6 +69,7 @@ const addScreenShot = async (req, res, next) => {
         data: screenshots
       });
     } catch (error) {
+      console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 500));
     }
   } else {
@@ -99,6 +101,7 @@ const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
         data: screenshot
       });
     } catch (error) {
+      console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
     }
   } else if (type === "image") {
@@ -125,6 +128,7 @@ const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
         data: screenshot
       });
     } catch (error) {
+      console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
     }
   } else {
@@ -161,6 +165,7 @@ const getScreenshot = asyncErrorWrapper(async (req, res, next) => {
       data: userGames
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });

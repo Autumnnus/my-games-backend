@@ -54,6 +54,7 @@ const logout = asyncErrorWrapper(async (req, res, next) => {
         message: "Logout Successful"
       });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -110,6 +111,7 @@ const resetPassword = asyncErrorWrapper(async (req, res, next) => {
       message: "Reset Password Process Success"
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -177,6 +179,7 @@ const editUser = asyncErrorWrapper(async (req, res, next) => {
       data: updatedUser
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
@@ -235,6 +238,7 @@ const verifyAccount = asyncErrorWrapper(async (req, res, next) => {
       message: "Account Verification Process Success"
     });
   } catch (error) {
+    console.error("ERROR: ", error);
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });

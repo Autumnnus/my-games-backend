@@ -19,7 +19,7 @@ const getAccessToRoute = (req, res, next) => {
   }
   jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ error: "Invalid token" });
+      return res.status(403).json({ message: "Invalid token. Please Login" });
     }
     req.user = {
       id: decoded.id,
