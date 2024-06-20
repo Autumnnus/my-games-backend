@@ -3,7 +3,8 @@ const {
   getScreenshot,
   addScreenShot,
   editScreenshot,
-  deleteScreenshot
+  deleteScreenshot,
+  getRandomScreenshot
 } = require("../../controllers/screenshot");
 const {
   getAccessToRoute,
@@ -19,6 +20,7 @@ const upload = require("../../helpers/functions/multer");
 const router = express.Router();
 
 router.get("/:game_id", getScreenshot);
+router.get("/get/random", getRandomScreenshot);
 router.post(
   "/add/:game_id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],

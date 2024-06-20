@@ -16,9 +16,7 @@ const addScreenShot = async (req, res, next) => {
   const { name, type, url } = req.body;
   const userScreenshots = await Screenshot.find({ user: req.user.id });
   const gameScreenshots = await Screenshot.find({ game: game_id });
-  if (!req.files || req.files.length === 0) {
-    return next(new CustomError("No file uploaded", 400));
-  }
+
   if (type === "text") {
     try {
       const screenshot = await Screenshot.create({
@@ -45,6 +43,9 @@ const addScreenShot = async (req, res, next) => {
       return next(
         new CustomError("Your role is not support this feature", 401)
       );
+    }
+    if (!req.files || req.files.length === 0) {
+      return next(new CustomError("No file uploaded", 400));
     }
     try {
       const screenshots = [];
@@ -114,7 +115,7 @@ const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
       let urlToUpdate = screenshot.url;
       let keyToUpdate = screenshot.key;
       if (req.file) {
-        const awsFile = await s3Updatev2(screenshot.key, req.file);
+        const awsFile = await s3Updatev2(screenshot.key || req.file.originalname, req.file);
         urlToUpdate = awsFile.Location;
         keyToUpdate = awsFile.key;
       }
@@ -158,7 +159,7 @@ const getScreenshot = asyncErrorWrapper(async (req, res, next) => {
   try {
     const { game_id } = req.params;
     const userGames = await Screenshot.find({ game: game_id }).sort({
-      createdAt: -1
+      _id: -1
     });
     return res.status(200).json({
       success: true,
@@ -170,9 +171,31 @@ const getScreenshot = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
+const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
+  try {
+    const allScreenshots = await Screenshot.find();
+    const randomIndex = Math.floor(Math.random() * allScreenshots.length);
+    if (allScreenshots.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'No screenshots found in the collection'
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      data: allScreenshots[randomIndex]
+    });
+  } catch (error) {
+    console.error("ERROR: ", error);
+    return next(new CustomError(`Error: ${error}`, 404));
+  }
+});
+
+
 module.exports = {
   addScreenShot,
   editScreenshot,
   deleteScreenshot,
-  getScreenshot
+  getScreenshot,
+  getRandomScreenshot
 };

@@ -1,6 +1,8 @@
+const { s3Deletev2 } = require("../../s3Service");
 const CustomError = require("../helpers/errors/CustomError");
 const { findUserByIdOrError } = require("../helpers/functions/findById");
 const Games = require("../models/Games");
+const Screenshot = require("../models/Screenshot");
 const User = require("../models/User");
 const asyncErrorWrapper = require("express-async-handler");
 
@@ -43,7 +45,15 @@ const deleteUser = asyncErrorWrapper(async (req, res, next) => {
     if (user.id === id) {
       return next(new CustomError("You can not delete yourself", 400));
     }
+    const screenshots = await Screenshot.find({ user: id });
+    for (const screenshot of screenshots) {
+      const result = await s3Deletev2(screenshot.key);
+      if (!result.success) {
+        console.error(`Failed to delete S3 object with key ${screenshot.key}: ${result.message}`);
+      }
+    }
     await Games.deleteMany({ userId: id });
+    await Screenshot.deleteMany({ user: id });
     await User.findByIdAndDelete(id);
     return res.status(200).json({
       success: true,

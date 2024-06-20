@@ -10,6 +10,8 @@ const { generateAccessToken } = require("../helpers/auth/jwt-helper");
 const nodemailer = require("nodemailer");
 const { findUserByIdOrError } = require("../helpers/functions/findById");
 const sendEmail = require("../helpers/functions/sendMail");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const register = asyncErrorWrapper(async (req, res, next) => {
   const { email, name, password } = req.body;
@@ -68,7 +70,7 @@ const forgotPassword = asyncErrorWrapper(async (req, res, next) => {
 
   const resetPasswordToken = user.getResetPasswordTokenFromUser();
   await user.save();
-  const resetPasswordUrl = `http://localhost:3001/api/auth/resetpassword?resetPasswordToken=${resetPasswordToken}`;
+  const resetPasswordUrl = `${process.env.FRONTEND_URL}/auth/resetPassword?resetPasswordToken=${resetPasswordToken}`;
 
   try {
     const info = await sendEmail(
@@ -196,7 +198,7 @@ const validateEmail = asyncErrorWrapper(async (req, res, next) => {
 
   const verificationToken = user.getVerificationTokenFromUser();
   await user.save();
-  const verifyAccountUrl = `http://localhost:3001/api/auth/verifyAccount?verificationToken=${verificationToken}`;
+  const verifyAccountUrl = `${process.env.FRONTEND_URL}/api/auth/verifyAccount?verificationToken=${verificationToken}`;
 
   try {
     const info = await sendEmail(

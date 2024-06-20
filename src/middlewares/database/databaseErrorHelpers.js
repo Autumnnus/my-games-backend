@@ -39,7 +39,8 @@ const checkGameSSExist = asyncErrorWrapper(async (req, _, next) => {
 });
 
 const checkIsAdmin = asyncErrorWrapper(async (req, _, next) => {
-  const { role } = req.user;
+  const user = await User.findById(req.user.id);
+  const role = user.role;
   if (role !== "admin") {
     return next(new CustomError("Only admins can access this route", 403));
   }
