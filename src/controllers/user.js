@@ -49,7 +49,9 @@ const deleteUser = asyncErrorWrapper(async (req, res, next) => {
     for (const screenshot of screenshots) {
       const result = await s3Deletev2(screenshot.key);
       if (!result.success) {
-        console.error(`Failed to delete S3 object with key ${screenshot.key}: ${result.message}`);
+        console.error(
+          `Failed to delete S3 object with key ${screenshot.key}: ${result.message}`
+        );
       }
     }
     await Games.deleteMany({ userId: id });

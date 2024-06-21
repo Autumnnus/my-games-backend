@@ -115,7 +115,10 @@ const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
       let urlToUpdate = screenshot.url;
       let keyToUpdate = screenshot.key;
       if (req.file) {
-        const awsFile = await s3Updatev2(screenshot.key || req.file.originalname, req.file);
+        const awsFile = await s3Updatev2(
+          screenshot.key || req.file.originalname,
+          req.file
+        );
         urlToUpdate = awsFile.Location;
         keyToUpdate = awsFile.key;
       }
@@ -178,7 +181,7 @@ const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
     if (allScreenshots.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'No screenshots found in the collection'
+        error: "No screenshots found in the collection"
       });
     }
     return res.status(200).json({
@@ -190,7 +193,6 @@ const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
-
 
 module.exports = {
   addScreenShot,
