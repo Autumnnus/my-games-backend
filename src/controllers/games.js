@@ -102,7 +102,7 @@ const deleteGame = asyncErrorWrapper(async (req, res, next) => {
 const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { order, sortBy, search } = req.query;
-  let sortCriteria = {};
+  let sortCriteria = {lastPlay: -1 };
   const matchCriteria = { userId: id };
   if (sortBy) {
     sortCriteria = { [sortBy]: order === "asc" ? 1 : -1 };
@@ -112,24 +112,6 @@ const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   }
 
   try {
-    // let userGames;
-    // if (sortBy === "screenshots") {
-    //   userGames = await Games.aggregate([
-    //     {
-    //       $match: search ? matchCriteria : {}
-    //     },
-    //     {
-    //       $addFields: {
-    //         arrayLength: { $size: "$screenshots" }
-    //       }
-    //     },
-    //     {
-    //       $sort: { arrayLength: order === "asc" ? 1 : -1 }
-    //     }
-    //   ]);
-    // } else {
-    //   userGames = await Games.find(matchCriteria).sort(sortCriteria);
-    // }
     const userGames = await Games.find(matchCriteria).sort(sortCriteria);
     return res.status(200).json({
       success: true,
