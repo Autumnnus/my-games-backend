@@ -102,7 +102,7 @@ const deleteGame = asyncErrorWrapper(async (req, res, next) => {
 const getUserGames = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { order, sortBy, search } = req.query;
-  let sortCriteria = {lastPlay: -1 };
+  let sortCriteria = { lastPlay: -1 };
   const matchCriteria = { userId: id };
   if (sortBy) {
     sortCriteria = { [sortBy]: order === "asc" ? 1 : -1 };
