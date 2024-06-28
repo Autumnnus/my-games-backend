@@ -1,5 +1,7 @@
 const asyncErrorWrapper = require("express-async-handler");
 const CustomError = require("../helpers/errors/CustomError");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const getIGDBGames = asyncErrorWrapper(async (req, res, next) => {
   const { search } = req.query;
@@ -8,8 +10,8 @@ const getIGDBGames = asyncErrorWrapper(async (req, res, next) => {
     {
       method: "POST",
       headers: {
-        "Client-ID": "l4pr55lt0ezaizlm7ug9sat0s5zorp",
-        Authorization: `Bearer xtc36j138h3pk0wxl3z53r27a7rrxt`,
+        "Client-ID": process.env.IGDB_CLIENT_ID,
+        Authorization: `Bearer ${process.env.IGDB_ACCESS_TOKEN}`,
         "Content-Type": "application/json",
         Body: "fields *;"
       }
