@@ -36,8 +36,8 @@ const getIGDBGameCover = asyncErrorWrapper(async (req, res, next) => {
   fetch(`https://api.igdb.com/v4/covers/${coverId}?fields=*`, {
     method: "GET",
     headers: {
-      "Client-ID": "l4pr55lt0ezaizlm7ug9sat0s5zorp",
-      Authorization: `Bearer xtc36j138h3pk0wxl3z53r27a7rrxt`,
+      "Client-ID": process.env.IGDB_CLIENT_ID,
+      Authorization: `Bearer ${process.env.IGDB_ACCESS_TOKEN}`,
       "Content-Type": "application/json",
       Body: "fields *;"
     }
@@ -48,7 +48,7 @@ const getIGDBGameCover = asyncErrorWrapper(async (req, res, next) => {
     .then((data) => {
       return res.status(200).json({
         success: true,
-        data: data
+        data: data[0]
       });
     })
     .catch((error) => {
