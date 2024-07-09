@@ -174,19 +174,35 @@ const getScreenshot = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
+const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
   try {
     const allScreenshots = await Screenshot.find();
-    const randomIndex = Math.floor(Math.random() * allScreenshots.length);
+    const screenshotCount = req.params.count ? parseInt(req.params.count) : 1;
+    console.log("screenshotCount", screenshotCount);
     if (allScreenshots.length === 0) {
       return res.status(404).json({
         success: false,
         error: "No screenshots found in the collection"
       });
     }
+
+    if (screenshotCount > allScreenshots.length) {
+      return res.status(400).json({
+        success: false,
+        error: "Requested number of screenshots exceeds the available unique screenshots"
+      });
+    }
+
+    const selectedScreenshots = [];
+    while (selectedScreenshots.length < screenshotCount) {
+      const randomIndex = Math.floor(Math.random() * allScreenshots.length);
+      const randomScreenshot = allScreenshots.splice(randomIndex, 1)[0];
+      selectedScreenshots.push(randomScreenshot);
+    }
+    console.log("selectedSS",selectedScreenshots);
     return res.status(200).json({
       success: true,
-      data: allScreenshots[randomIndex]
+      data: selectedScreenshots
     });
   } catch (error) {
     console.error("ERROR: ", error);
@@ -194,10 +210,31 @@ const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
   }
 });
 
+
+// const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
+//   try {
+//     const allScreenshots = await Screenshot.find();
+//     const randomIndex = Math.floor(Math.random() * allScreenshots.length);
+//     if (allScreenshots.length === 0) {
+//       return res.status(404).json({
+//         success: false,
+//         error: "No screenshots found in the collection"
+//       });
+//     }
+//     return res.status(200).json({
+//       success: true,
+//       data: allScreenshots[randomIndex]
+//     });
+//   } catch (error) {
+//     console.error("ERROR: ", error);
+//     return next(new CustomError(`Error: ${error}`, 404));
+//   }
+// });
+
 module.exports = {
   addScreenShot,
   editScreenshot,
   deleteScreenshot,
   getScreenshot,
-  getRandomScreenshot
+  getRandomScreenshots
 };
