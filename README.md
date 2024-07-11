@@ -2,10 +2,12 @@
 
 This project aims to build the backend application of [My-Games](https://my-games.netlify.app/) website from scratch. Since the project aim follows the MERN stack path, ExpressJS and MongoDB technologies are used in the Backend part. It is currently under construction.
 
-# Frontend Part
+# Features
 
-At the same time, the Frontend part is being refactored. Clean Code, Typescript and State Management sections are being greatly improved.
+- Authentication & Membership
+- Sending Email to our users
+- Role System
+- Screenshot share with Amazon Web Service S3 support
+- IGDB API Game Fetch
 
-[Developing Frontend Project](https://github.com/VectortheGreat/my-games-v2)
-
-[Currently Active(Old) Frontend Project](https://github.com/VectortheGreat/my-games-old)
+[Frontend Project](https://github.com/VectortheGreat/my-games)
