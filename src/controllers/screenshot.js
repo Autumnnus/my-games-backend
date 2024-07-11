@@ -178,7 +178,6 @@ const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
   try {
     const allScreenshots = await Screenshot.find();
     const screenshotCount = req.params.count ? parseInt(req.params.count) : 1;
-    console.log("screenshotCount", screenshotCount);
     if (allScreenshots.length === 0) {
       return res.status(404).json({
         success: false,
@@ -199,7 +198,6 @@ const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
       const randomScreenshot = allScreenshots.splice(randomIndex, 1)[0];
       selectedScreenshots.push(randomScreenshot);
     }
-    console.log("selectedSS",selectedScreenshots);
     return res.status(200).json({
       success: true,
       data: selectedScreenshots
@@ -209,27 +207,6 @@ const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
     return next(new CustomError(`Error: ${error}`, 404));
   }
 });
-
-
-// const getRandomScreenshot = asyncErrorWrapper(async (_, res, next) => {
-//   try {
-//     const allScreenshots = await Screenshot.find();
-//     const randomIndex = Math.floor(Math.random() * allScreenshots.length);
-//     if (allScreenshots.length === 0) {
-//       return res.status(404).json({
-//         success: false,
-//         error: "No screenshots found in the collection"
-//       });
-//     }
-//     return res.status(200).json({
-//       success: true,
-//       data: allScreenshots[randomIndex]
-//     });
-//   } catch (error) {
-//     console.error("ERROR: ", error);
-//     return next(new CustomError(`Error: ${error}`, 404));
-//   }
-// });
 
 module.exports = {
   addScreenShot,
