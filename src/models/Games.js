@@ -50,6 +50,57 @@ const GamesSchema = new Schema(
       required: true,
       ref: "User"
     },
+    firstFinished:Date,
+    igdb: {
+      id: Number,
+      cover:{
+        id: Number,
+        url: String,
+        game:Number
+      },
+      aggregated_rating: Number,
+      aggregated_rating_count: Number,
+      game_modes: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      genres: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      developers : [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      publishers: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      player_perspectives: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      release_date: {
+        id: Number,
+        date: Number
+      },
+      themes: [
+        {
+          id: Number,
+          name: String
+        }
+      ]
+    },
     slug: String
   },
   { timestamps: true }

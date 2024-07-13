@@ -22,7 +22,7 @@ const getSingleUser = asyncErrorWrapper(async (req, res, next) => {
 
 const getAllUsers = asyncErrorWrapper(async (_, res, next) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().select("-password");
     return res.status(200).json({
       success: true,
       data: users
