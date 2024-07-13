@@ -50,19 +50,14 @@ const GamesSchema = new Schema(
       required: true,
       ref: "User"
     },
-    firstFinishedDate:Date,
-    favoriteGames: [
-      {
-        type: mongoose.Schema.ObjectId,
-        name: String,
-        rating: Number,
-        photo: String,
-        ref: "Games"
-      }
-    ],
+    firstFinished:Date,
     igdb: {
       id: Number,
-      cover: Number,
+      cover:{
+        id: Number,
+        url: String,
+        game:Number
+      },
       aggregated_rating: Number,
       aggregated_rating_count: Number,
       game_modes: [
@@ -77,15 +72,16 @@ const GamesSchema = new Schema(
           name: String
         }
       ],
-      involved_companies: [
+      developers : [
         {
           id: Number,
-          company: {
-            id: Number,
-            name: String
-          },
-          developer: Boolean,
-          publisher: Boolean
+          name: String
+        }
+      ],
+      publishers: [
+        {
+          id: Number,
+          name: String
         }
       ],
       player_perspectives: [

@@ -50,7 +50,16 @@ const UserSchema = new Schema(
     screenshotSize: {
       type: Number,
       default: 0
-    }
+    },
+    favoriteGames: [
+      {
+        type: mongoose.Schema.ObjectId,
+        name: String,
+        rating: Number,
+        photo: String,
+        ref: "Games"
+      }
+    ]
   },
   { timestamps: true }
 );

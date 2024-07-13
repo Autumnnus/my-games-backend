@@ -33,7 +33,7 @@ const addNewGame = asyncErrorWrapper(async (req, res, next) => {
 
 const editGame = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { name, photo, lastPlay, platform, review, rating, status, playTime } =
+  const { name, photo, lastPlay, platform, review, rating, status, playTime,firstFinished,igdb } =
     req.body;
   try {
     let game = await findGameByIdOrError(id, next);
@@ -45,7 +45,9 @@ const editGame = asyncErrorWrapper(async (req, res, next) => {
       review,
       rating,
       status,
-      playTime
+      playTime,
+      firstFinished,
+      igdb
     };
     Object.assign(game, updatedGameFields);
     game = await game.save();

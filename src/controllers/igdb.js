@@ -5,8 +5,9 @@ dotenv.config();
 
 const getIGDBGames = asyncErrorWrapper(async (req, res, next) => {
   const { search } = req.query;
+  const fields = "fields=name,id,cover.game,cover.url,slug,summary,genres.name,themes.name,player_perspectives.name,game_modes.name,release_dates.date,involved_companies.publisher,involved_companies.developer,aggregated_rating,involved_companies.company.name,aggregated_rating_count";
   fetch(
-    `https://api.igdb.com/v4/games?search=${search}&fields=name,id,cover,rating,slug,summary,tags`,
+    `https://api.igdb.com/v4/games?search=${search}&${fields}`,
     {
       method: "POST",
       headers: {
