@@ -1,18 +1,16 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   addNewGame,
-  editGame,
-  getUserGames,
   deleteGame,
-  getUserGameDetail
-} = require("../../controllers/games");
-const {
+  editGame,
+  getUserGameDetail,
+  getUserGames
+} from "../../controllers/games";
+import {
   getAccessToRoute,
   getGameOwnerAccess
-} = require("../../middlewares/authorization/auth");
-const {
-  checkGameExist
-} = require("../../middlewares/database/databaseErrorHelpers");
+} from "../../middlewares/authorization/auth";
+import { checkGameExist } from "../../middlewares/database/databaseErrorHelpers";
 
 const router = express.Router();
 
@@ -30,4 +28,4 @@ router.put(
   editGame
 );
 
-module.exports = router;
+export default router;

@@ -1,18 +1,19 @@
-const express = require("express");
-const {
-  register,
+import express from "express";
+import {
+  editUser,
+  forgotPassword,
   login,
   logout,
-  forgotPassword,
+  register,
   resetPassword,
-  verifyAccount,
-  editUser,
-  validateEmail
-} = require("../../controllers/auth");
-const { getAccessToRoute } = require("../../middlewares/authorization/auth");
+  validateEmail,
+  verifyAccount
+} from "../../controllers/auth";
+import { getAccessToRoute } from "../../middlewares/authorization/auth";
 
 const router = express.Router();
 
+// Define routes
 router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", getAccessToRoute, logout);
@@ -22,4 +23,4 @@ router.put("/edit", getAccessToRoute, editUser);
 router.post("/validateEmail", getAccessToRoute, validateEmail);
 router.put("/verifyAccount", verifyAccount);
 
-module.exports = router;
+export default router;

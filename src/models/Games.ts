@@ -1,8 +1,62 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-const slugify = require("slugify");
+import mongoose, { Document, Schema } from "mongoose";
+import slugify from "slugify";
 
-const GamesSchema = new Schema(
+interface IGames extends Document {
+  name: string;
+  photo?: string;
+  lastPlay: Date;
+  platform: "steam" | "epicGames" | "ubisoft" | "xboxPc" | "eaGames" | "torrent" | "playstation" | "xboxSeries" | "nintendo" | "mobile" | "otherPlatforms";
+  review?: string;
+  rating?: number;
+  status: "completed" | "abandoned" | "toBeCompleted" | "activePlaying";
+  playTime: number;
+  screenshotSize?: number;
+  userId: mongoose.Schema.Types.ObjectId;
+  firstFinished?: Date;
+  igdb?: {
+    id: number;
+    cover: {
+      id: number;
+      url: string;
+      game: number;
+    };
+    aggregated_rating?: number;
+    aggregated_rating_count?: number;
+    game_modes?: {
+      id: number;
+      name: string;
+    }[];
+    genres?: {
+      id: number;
+      name: string;
+    }[];
+    developers?: {
+      id: number;
+      name: string;
+    }[];
+    publishers?: {
+      id: number;
+      name: string;
+    }[];
+    player_perspectives?: {
+      id: number;
+      name: string;
+    }[];
+    release_date?: {
+      id: number;
+      date: number;
+    };
+    themes?: {
+      id: number;
+      name: string;
+    }[];
+  };
+  slug?: string;
+
+  makeSlug(): string;
+}
+
+const GamesSchema = new Schema<IGames>(
   {
     name: {
       type: String,
@@ -50,13 +104,13 @@ const GamesSchema = new Schema(
       required: true,
       ref: "User"
     },
-    firstFinished:Date,
+    firstFinished: Date,
     igdb: {
       id: Number,
-      cover:{
+      cover: {
         id: Number,
         url: String,
-        game:Number
+        game: Number
       },
       aggregated_rating: Number,
       aggregated_rating_count: Number,
@@ -72,7 +126,7 @@ const GamesSchema = new Schema(
           name: String
         }
       ],
-      developers : [
+      developers: [
         {
           id: Number,
           name: String
@@ -123,5 +177,4 @@ GamesSchema.methods.makeSlug = function () {
     trim: true
   });
 };
-
-module.exports = mongoose.model("Games", GamesSchema);
+export default mongoose.model("Games", GamesSchema);

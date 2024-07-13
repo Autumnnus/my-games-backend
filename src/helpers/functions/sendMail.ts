@@ -1,6 +1,6 @@
-const nodemailer = require("nodemailer");
-const CustomError = require("../errors/CustomError");
-const Mailgen = require("mailgen");
+import nodemailer from "nodemailer";
+import CustomError from "../errors/CustomError";
+import { Mailgen } from "mailgen";
 
 const sendEmail = async (user, subject, content, url) => {
   try {
@@ -59,4 +59,4 @@ const sendEmail = async (user, subject, content, url) => {
     );
   }
 };
-module.exports = sendEmail;
+export default sendEmail;

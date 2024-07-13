@@ -1,8 +1,9 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const Schema = mongoose.Schema;
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
 
 const UserSchema = new Schema(
   {
@@ -71,9 +72,9 @@ UserSchema.methods.generateJwtFromUser = function () {
     id: this._id,
     name: this.name
   };
-  // const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-  //   expiresIn: "365d"
-  // });
+  if (!ACCESS_TOKEN_SECRET) {
+    throw new Error("ACCESS_TOKEN_SECRET is not defined");
+  }
   const token = jwt.sign(payload, ACCESS_TOKEN_SECRET);
   return token;
 };
@@ -117,4 +118,4 @@ UserSchema.pre("save", function (next) {
   });
 });
 
-module.exports = mongoose.model("User", UserSchema);
+export default mongoose.model("User", UserSchema);

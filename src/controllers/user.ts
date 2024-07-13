@@ -1,10 +1,10 @@
-const { s3Deletev2 } = require("../../s3Service");
-const CustomError = require("../helpers/errors/CustomError");
-const { findUserByIdOrError } = require("../helpers/functions/findById");
-const Games = require("../models/Games");
-const Screenshot = require("../models/Screenshot");
-const User = require("../models/User");
-const asyncErrorWrapper = require("express-async-handler");
+import { s3Deletev2 } from "../../s3Service";
+import CustomError from "../helpers/errors/CustomError";
+import { findUserByIdOrError } from "../helpers/functions/findById";
+import Games from "../models/Games";
+import Screenshot from "../models/Screenshot";
+import User from "../models/User";
+import asyncErrorWrapper from "express-async-handler";
 
 const getSingleUser = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
@@ -67,8 +67,4 @@ const deleteUser = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-module.exports = {
-  getSingleUser,
-  getAllUsers,
-  deleteUser
-};
+export { getSingleUser, getAllUsers, deleteUser };

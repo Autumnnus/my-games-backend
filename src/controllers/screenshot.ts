@@ -1,12 +1,12 @@
-const asyncErrorWrapper = require("express-async-handler");
-const CustomError = require("../helpers/errors/CustomError");
-const {
+import asyncErrorWrapper from "express-async-handler";
+import CustomError from "../helpers/errors/CustomError";
+import {
   findGameByIdOrError,
   findScreenshotByIdOrError,
   findUserByIdOrError
-} = require("../helpers/functions/findById");
-const Screenshot = require("../models/Screenshot");
-const { s3Uploadv2, s3Updatev2, s3Deletev2 } = require("../../s3Service");
+} from "../helpers/functions/findById";
+import Screenshot from "../models/Screenshot";
+import { s3Uploadv2, s3Updatev2, s3Deletev2 } from "../../s3Service";
 
 const addScreenShot = async (req, res, next) => {
   const { game_id } = req.params;
@@ -209,7 +209,7 @@ const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-module.exports = {
+export {
   addScreenShot,
   editScreenshot,
   deleteScreenshot,

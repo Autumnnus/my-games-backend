@@ -34,7 +34,7 @@ const getAccessTokenFromHeader = (req) => {
   return access_token;
 };
 
-module.exports = {
+export = {
   generateAccessToken,
   isTokenIncluded,
   getAccessTokenFromHeader

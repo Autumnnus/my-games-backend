@@ -1,21 +1,21 @@
-const express = require("express");
-const {
-  getScreenshot,
+import express from "express";
+import {
   addScreenShot,
-  editScreenshot,
   deleteScreenshot,
-  getRandomScreenshots
-} = require("../../controllers/screenshot");
-const {
+  editScreenshot,
+  getRandomScreenshots,
+  getScreenshot
+} from "../../controllers/screenshot";
+import upload from "../../helpers/functions/multer";
+import {
   getAccessToRoute,
-  getGameSSOwnerAccess,
-  getGameOwnerAccess
-} = require("../../middlewares/authorization/auth");
-const {
-  checkGameSSExist,
-  checkGameExist
-} = require("../../middlewares/database/databaseErrorHelpers");
-const upload = require("../../helpers/functions/multer");
+  getGameOwnerAccess,
+  getGameSSOwnerAccess
+} from "../../middlewares/authorization/auth";
+import {
+  checkGameExist,
+  checkGameSSExist
+} from "../../middlewares/database/databaseErrorHelpers";
 
 const router = express.Router();
 
@@ -39,4 +39,4 @@ router.put(
   editScreenshot
 );
 
-module.exports = router;
+export default router;

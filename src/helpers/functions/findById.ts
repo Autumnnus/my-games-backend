@@ -1,7 +1,7 @@
-const User = require("../../models/User");
-const Games = require("../../models/Games");
-const CustomError = require("../errors/CustomError");
-const Screenshot = require("../../models/Screenshot");
+import User from "../../models/User";
+import Games from "../../models/Games";
+import CustomError from "../errors/CustomError";
+import Screenshot from "../../models/Screenshot";
 
 async function findUserByIdOrError(id, next) {
   const user = await User.findById(id);
@@ -25,7 +25,7 @@ async function findScreenshotByIdOrError(id, next) {
   return screenshot;
 }
 
-module.exports = {
+export = {
   findUserByIdOrError,
   findGameByIdOrError,
   findScreenshotByIdOrError

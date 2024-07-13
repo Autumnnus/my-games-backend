@@ -1,13 +1,13 @@
-const CustomError = require("../../helpers/errors/CustomError");
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-const asyncErrorWrapper = require("express-async-handler");
-const Games = require("../../models/Games");
-const {
+import dotenv from "dotenv";
+import asyncErrorWrapper from "express-async-handler";
+import jwt from "jsonwebtoken";
+import {
   getAccessTokenFromHeader,
   isTokenIncluded
-} = require("../../helpers/auth/jwt-helper");
-const Screenshot = require("../../models/Screenshot");
+} from "../../helpers/auth/jwt-helper";
+import CustomError from "../../helpers/errors/CustomError";
+import Games from "../../models/Games";
+import Screenshot from "../../models/Screenshot";
 dotenv.config();
 
 const getAccessToRoute = (req, res, next) => {
@@ -53,8 +53,9 @@ const getGameSSOwnerAccess = asyncErrorWrapper(async (req, _, next) => {
   next();
 });
 
-module.exports = {
+export {
   getAccessToRoute,
   getGameOwnerAccess,
   getGameSSOwnerAccess
 };
+

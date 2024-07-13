@@ -62,7 +62,7 @@ const productSortHelper = (query, req) => {
   return query.sort("-createdAt");
 };
 
-module.exports = {
+export = {
   searchHelper,
   populateHelper,
   questionSortHelper,

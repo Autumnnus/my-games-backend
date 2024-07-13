@@ -1,10 +1,10 @@
-const Games = require("../models/Games");
-const asyncErrorWrapper = require("express-async-handler");
-const CustomError = require("../helpers/errors/CustomError");
-const {
-  findUserByIdOrError,
-  findGameByIdOrError
-} = require("../helpers/functions/findById");
+import asyncErrorWrapper from "express-async-handler";
+import CustomError from "../helpers/errors/CustomError";
+import {
+  findGameByIdOrError,
+  findUserByIdOrError
+} from "../helpers/functions/findById";
+import Games from "../models/Games";
 
 const addNewGame = asyncErrorWrapper(async (req, res, next) => {
   const { status } = req.body;
@@ -33,8 +33,18 @@ const addNewGame = asyncErrorWrapper(async (req, res, next) => {
 
 const editGame = asyncErrorWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { name, photo, lastPlay, platform, review, rating, status, playTime,firstFinished,igdb } =
-    req.body;
+  const {
+    name,
+    photo,
+    lastPlay,
+    platform,
+    review,
+    rating,
+    status,
+    playTime,
+    firstFinished,
+    igdb
+  } = req.body;
   try {
     let game = await findGameByIdOrError(id, next);
     const updatedGameFields = {
@@ -144,10 +154,4 @@ const getUserGameDetail = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-module.exports = {
-  addNewGame,
-  editGame,
-  deleteGame,
-  getUserGameDetail,
-  getUserGames
-};
+export { addNewGame, deleteGame, editGame, getUserGameDetail, getUserGames };

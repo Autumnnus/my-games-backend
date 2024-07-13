@@ -1,16 +1,16 @@
-const User = require("../models/User");
-const CustomError = require("../helpers/errors/CustomError");
-const bcrypt = require("bcryptjs");
-const asyncErrorWrapper = require("express-async-handler");
-const {
-  validateUserInput,
-  comparePassword
-} = require("../helpers/input/inputHelpers");
-const { generateAccessToken } = require("../helpers/auth/jwt-helper");
-const nodemailer = require("nodemailer");
-const { findUserByIdOrError } = require("../helpers/functions/findById");
-const sendEmail = require("../helpers/functions/sendMail");
-const dotenv = require("dotenv");
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import asyncErrorWrapper from "express-async-handler";
+import nodemailer from "nodemailer";
+import { generateAccessToken } from "../helpers/auth/jwt-helper";
+import CustomError from "../helpers/errors/CustomError";
+import { findUserByIdOrError } from "../helpers/functions/findById";
+import sendEmail from "../helpers/functions/sendMail";
+import {
+  comparePassword,
+  validateUserInput
+} from "../helpers/input/inputHelpers";
+import User from "../models/User";
 dotenv.config();
 
 const register = asyncErrorWrapper(async (req, res, next) => {
@@ -245,13 +245,13 @@ const verifyAccount = asyncErrorWrapper(async (req, res, next) => {
   }
 });
 
-module.exports = {
-  register,
+export {
+  editUser,
+  forgotPassword,
   login,
   logout,
+  register,
   resetPassword,
-  forgotPassword,
-  editUser,
   validateEmail,
   verifyAccount
 };

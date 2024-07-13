@@ -1,9 +1,9 @@
-const express = require("express");
-const routers = require("./routes/index");
-const connectDatabase = require("./db/conn");
-const cors = require("cors");
+import cors from "cors";
+import express from "express";
+import connectDatabase from "./db/conn";
+import errorHandler from "./middlewares/error/ErrorHandler";
+import routers from "./routes/index";
 const dotenv = require("dotenv");
-const errorHandler = require("./middlewares/error/ErrorHandler");
 dotenv.config();
 
 const app = express();

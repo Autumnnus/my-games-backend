@@ -1,23 +1,21 @@
-const asyncErrorWrapper = require("express-async-handler");
-const CustomError = require("../helpers/errors/CustomError");
-const dotenv = require("dotenv");
+import asyncErrorWrapper from "express-async-handler";
+import CustomError from "../helpers/errors/CustomError";
+import dotenv from "dotenv";
 dotenv.config();
 
 const getIGDBGames = asyncErrorWrapper(async (req, res, next) => {
   const { search } = req.query;
-  const fields = "fields=name,id,cover.game,cover.url,slug,summary,genres.name,themes.name,player_perspectives.name,game_modes.name,release_dates.date,involved_companies.publisher,involved_companies.developer,aggregated_rating,involved_companies.company.name,aggregated_rating_count";
-  fetch(
-    `https://api.igdb.com/v4/games?search=${search}&${fields}`,
-    {
-      method: "POST",
-      headers: {
-        "Client-ID": process.env.IGDB_CLIENT_ID,
-        Authorization: `Bearer ${process.env.IGDB_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-        Body: "fields *;"
-      }
+  const fields =
+    "fields=name,id,cover.game,cover.url,slug,summary,genres.name,themes.name,player_perspectives.name,game_modes.name,release_dates.date,involved_companies.publisher,involved_companies.developer,aggregated_rating,involved_companies.company.name,aggregated_rating_count";
+  fetch(`https://api.igdb.com/v4/games?search=${search}&${fields}`, {
+    method: "POST",
+    headers: {
+      "Client-ID": process.env.IGDB_CLIENT_ID,
+      Authorization: `Bearer ${process.env.IGDB_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+      Body: "fields *;"
     }
-  )
+  })
     .then((response) => {
       return response.json();
     })
@@ -58,7 +56,4 @@ const getIGDBGameCover = asyncErrorWrapper(async (req, res, next) => {
     });
 });
 
-module.exports = {
-  getIGDBGames,
-  getIGDBGameCover
-};
+export { getIGDBGames, getIGDBGameCover };

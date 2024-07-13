@@ -1,8 +1,8 @@
-const User = require("../../models/User");
-const Games = require("../../models/Games");
-const CustomError = require("../../helpers/errors/CustomError");
-const asyncErrorWrapper = require("express-async-handler");
-const Screenshot = require("../../models/Screenshot");
+import asyncErrorWrapper from "express-async-handler";
+import CustomError from "../../helpers/errors/CustomError";
+import Games from "../../models/Games";
+import Screenshot from "../../models/Screenshot";
+import User from "../../models/User";
 
 const checkUserExist = asyncErrorWrapper(async (req, _, next) => {
   const { id } = req.params;
@@ -47,9 +47,9 @@ const checkIsAdmin = asyncErrorWrapper(async (req, _, next) => {
   next();
 });
 
-module.exports = {
-  checkUserExist,
+export {
   checkGameExist,
   checkGameSSExist,
-  checkIsAdmin
+  checkIsAdmin, checkUserExist
 };
+

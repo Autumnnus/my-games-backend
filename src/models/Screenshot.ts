@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
 const ScreenshotSchema = new Schema(
   {
@@ -40,4 +40,4 @@ ScreenshotSchema.pre("save", function (next) {
   next();
 });
 
-module.exports = mongoose.model("Screenshot", ScreenshotSchema);
+export default mongoose.model("Screenshot", ScreenshotSchema);
