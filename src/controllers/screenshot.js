@@ -188,7 +188,8 @@ const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
     if (screenshotCount > allScreenshots.length) {
       return res.status(400).json({
         success: false,
-        error: "Requested number of screenshots exceeds the available unique screenshots"
+        error:
+          "Requested number of screenshots exceeds the available unique screenshots"
       });
     }
 

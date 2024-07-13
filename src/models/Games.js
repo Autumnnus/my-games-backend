@@ -50,6 +50,61 @@ const GamesSchema = new Schema(
       required: true,
       ref: "User"
     },
+    firstFinishedDate:Date,
+    favoriteGames: [
+      {
+        type: mongoose.Schema.ObjectId,
+        name: String,
+        rating: Number,
+        photo: String,
+        ref: "Games"
+      }
+    ],
+    igdb: {
+      id: Number,
+      cover: Number,
+      aggregated_rating: Number,
+      aggregated_rating_count: Number,
+      game_modes: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      genres: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      involved_companies: [
+        {
+          id: Number,
+          company: {
+            id: Number,
+            name: String
+          },
+          developer: Boolean,
+          publisher: Boolean
+        }
+      ],
+      player_perspectives: [
+        {
+          id: Number,
+          name: String
+        }
+      ],
+      release_date: {
+        id: Number,
+        date: Number
+      },
+      themes: [
+        {
+          id: Number,
+          name: String
+        }
+      ]
+    },
     slug: String
   },
   { timestamps: true }
