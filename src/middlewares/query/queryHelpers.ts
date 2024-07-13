@@ -1,6 +1,23 @@
-const searchHelper = (searchKey, query, req) => {
+type Query = {
+  populate(population: string): Query;
+  sort(sortKey: string): Query;
+  where(searchObject: any): Query;
+  skip(startIndex: number): Query;
+  limit(limit: number): Query;
+};
+
+type Request = {
+  query: {
+    search?: string;
+    sortBy?: string;
+    page?: string;
+    limit?: string;
+  };
+};
+
+const searchHelper = (searchKey: string, query: any, req: any): any => {
   if (req.query.search) {
-    const searchObject = {};
+    const searchObject: any = {};
 
     const regex = new RegExp(req.query.search, "i"); //*https://javascript.info/regexp-introduction
     searchObject[searchKey] = regex;
@@ -10,10 +27,10 @@ const searchHelper = (searchKey, query, req) => {
   return query;
 };
 
-const populateHelper = (query, population) => {
+const populateHelper = (query: Query, population: string): Query => {
   return query.populate(population);
 };
-const questionSortHelper = (query, req) => {
+const questionSortHelper = (query: Query, req: Request) => {
   const sortKey = req.query.sortBy;
   if (sortKey === "most-answered") {
     return query.sort("-answerCount -createAt");
@@ -23,14 +40,18 @@ const questionSortHelper = (query, req) => {
   }
   return query.sort("-createAt");
 };
-const paginationHelper = async (totalDocuments, query, req) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 5;
+const paginationHelper = async (
+  totalDocuments: number,
+  query: Query,
+  req: Request
+) => {
+  const page = parseInt(req.query.page ?? "1");
+  const limit = parseInt(req.query.limit ?? "5");
 
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
 
-  const pagination = {};
+  const pagination: { previous?: any; next?: any } = {};
   const total = totalDocuments;
 
   if (startIndex > 0) {
@@ -54,7 +75,7 @@ const paginationHelper = async (totalDocuments, query, req) => {
   };
 };
 
-const productSortHelper = (query, req) => {
+const productSortHelper = (query: Query, req: Request) => {
   const sortKey = req.query.sortBy;
   if (sortKey) {
     return query.sort(sortKey);
@@ -62,10 +83,10 @@ const productSortHelper = (query, req) => {
   return query.sort("-createdAt");
 };
 
-export = {
-  searchHelper,
-  populateHelper,
-  questionSortHelper,
+export {
   paginationHelper,
-  productSortHelper
+  populateHelper,
+  productSortHelper,
+  questionSortHelper,
+  searchHelper
 };

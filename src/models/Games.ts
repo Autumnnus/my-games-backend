@@ -1,11 +1,22 @@
 import mongoose, { Document, Schema } from "mongoose";
 import slugify from "slugify";
 
-interface IGames extends Document {
+type IGames = Document & {
   name: string;
   photo?: string;
   lastPlay: Date;
-  platform: "steam" | "epicGames" | "ubisoft" | "xboxPc" | "eaGames" | "torrent" | "playstation" | "xboxSeries" | "nintendo" | "mobile" | "otherPlatforms";
+  platform:
+    | "steam"
+    | "epicGames"
+    | "ubisoft"
+    | "xboxPc"
+    | "eaGames"
+    | "torrent"
+    | "playstation"
+    | "xboxSeries"
+    | "nintendo"
+    | "mobile"
+    | "otherPlatforms";
   review?: string;
   rating?: number;
   status: "completed" | "abandoned" | "toBeCompleted" | "activePlaying";
@@ -54,7 +65,7 @@ interface IGames extends Document {
   slug?: string;
 
   makeSlug(): string;
-}
+};
 
 const GamesSchema = new Schema<IGames>(
   {

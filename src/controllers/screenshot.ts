@@ -1,20 +1,37 @@
+import { NextFunction, Request, Response } from "express";
 import asyncErrorWrapper from "express-async-handler";
+import { s3Deletev2, s3Updatev2, s3Uploadv2 } from "../../s3Service";
 import CustomError from "../helpers/errors/CustomError";
-import {
-  findGameByIdOrError,
-  findScreenshotByIdOrError,
-  findUserByIdOrError
-} from "../helpers/functions/findById";
+import { findScreenshotByIdOrError } from "../helpers/functions/findById";
+import Games from "../models/Games";
 import Screenshot from "../models/Screenshot";
-import { s3Uploadv2, s3Updatev2, s3Deletev2 } from "../../s3Service";
+import User from "../models/User";
+import { AuthenticatedRequest } from "./games";
 
-const addScreenShot = async (req, res, next) => {
+interface AuthenticatedFileRequest extends Request {
+  user?: {
+    id: string;
+  };
+  files?: Express.Multer.File[];
+}
+
+const addScreenShot = async (
+  req: AuthenticatedFileRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const { game_id } = req.params;
-  const user = await findUserByIdOrError(req.user.id, next);
-  const game = await findGameByIdOrError(game_id, next);
+  const user = await User.findById(req.user?.id);
+  if (!user) {
+    return next(new CustomError("User not found", 404));
+  }
+  const game = await Games.findById(game_id);
+  if (!game) {
+    return next(new CustomError("Game not found", 404));
+  }
   const role = user.role;
   const { name, type, url } = req.body;
-  const userScreenshots = await Screenshot.find({ user: req.user.id });
+  const userScreenshots = await Screenshot.find({ user: req.user?.id });
   const gameScreenshots = await Screenshot.find({ game: game_id });
 
   if (type === "text") {
@@ -22,7 +39,7 @@ const addScreenShot = async (req, res, next) => {
       const screenshot = await Screenshot.create({
         name,
         url,
-        user: req.user.id,
+        user: req.user?.id,
         game: game_id,
         type: "text"
       });
@@ -54,7 +71,7 @@ const addScreenShot = async (req, res, next) => {
         const screenshot = await Screenshot.create({
           name,
           url: awsFile.Location,
-          user: req.user.id,
+          user: req.user?.id,
           key: awsFile.key,
           game: game_id,
           type: "image"
@@ -78,141 +95,164 @@ const addScreenShot = async (req, res, next) => {
   }
 };
 
-const editScreenshot = asyncErrorWrapper(async (req, res, next) => {
-  const { game_id, screenshot_id } = req.params;
-  const { name, type, url } = req.body;
-  const game = await findGameByIdOrError(game_id, next);
-  const user = await findUserByIdOrError(req.user.id, next);
-  const role = user.role;
-  const screenshot = await findScreenshotByIdOrError(screenshot_id, next);
-  if (!game) {
-    return next(new CustomError("Game not found", 404));
-  }
-  if (!screenshot) {
-    return next(new CustomError("Screenshot not found", 404));
-  }
-  if (type === "text") {
-    try {
-      screenshot.name = name ? name : null;
-      screenshot.url = url;
-      screenshot.type = "text";
-      await screenshot.save();
-      return res.status(200).json({
-        success: true,
-        data: screenshot
-      });
-    } catch (error) {
-      console.error("ERROR: ", error);
-      return next(new CustomError(`Error: ${error}`, 404));
+const editScreenshot = asyncErrorWrapper(
+  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+    const { game_id, screenshot_id } = req.params;
+    const { name, type, url } = req.body;
+    const user = await User.findById(req.user?.id);
+    if (!user) {
+      return next(new CustomError("User not found", 404));
     }
-  } else if (type === "image") {
-    if (!req.file && role !== "admin" && role !== "vip") {
-      return next(
-        new CustomError("Your role does not support this feature", 401)
-      );
+    const game = await Games.findById(game_id);
+    if (!game) {
+      return next(new CustomError("Game not found", 404));
     }
-    try {
-      let urlToUpdate = screenshot.url;
-      let keyToUpdate = screenshot.key;
-      if (req.file) {
-        const awsFile = await s3Updatev2(
-          screenshot.key || req.file.originalname,
-          req.file
-        );
-        urlToUpdate = awsFile.Location;
-        keyToUpdate = awsFile.key;
+    const role = user.role;
+    const screenshot = await findScreenshotByIdOrError(screenshot_id, next);
+    if (!game) {
+      return next(new CustomError("Game not found", 404));
+    }
+    if (!screenshot) {
+      return next(new CustomError("Screenshot not found", 404));
+    }
+    if (type === "text") {
+      try {
+        screenshot.name = name ? name : null;
+        screenshot.url = url;
+        screenshot.type = "text";
+        await screenshot.save();
+        return res.status(200).json({
+          success: true,
+          data: screenshot
+        });
+      } catch (error) {
+        console.error("ERROR: ", error);
+        return next(new CustomError(`Error: ${error}`, 404));
       }
-      screenshot.name = name ? name : null;
-      screenshot.url = urlToUpdate;
-      screenshot.type = "image";
-      screenshot.key = keyToUpdate;
-      await screenshot.save();
+    } else if (type === "image") {
+      if (!req.file && role !== "admin" && role !== "vip") {
+        return next(
+          new CustomError("Your role does not support this feature", 401)
+        );
+      }
+      try {
+        let urlToUpdate = screenshot.url;
+        let keyToUpdate = screenshot.key;
+        if (req.file) {
+          const awsFile = await s3Updatev2(
+            screenshot.key || req.file.originalname,
+            req.file
+          );
+          urlToUpdate = awsFile.Location;
+          keyToUpdate = awsFile.key;
+        }
+        screenshot.name = name ? name : null;
+        screenshot.url = urlToUpdate;
+        screenshot.type = "image";
+        screenshot.key = keyToUpdate;
+        await screenshot.save();
+        return res.status(200).json({
+          success: true,
+          data: screenshot
+        });
+      } catch (error) {
+        console.error("ERROR: ", error);
+        return next(new CustomError(`Error: ${error}`, 404));
+      }
+    } else {
+      return next(new CustomError(`${type} - Invalid Type`, 400));
+    }
+  }
+);
+
+const deleteScreenshot = asyncErrorWrapper(
+  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+    const { game_id, screenshot_id } = req.params;
+    const screenshot = await Screenshot.findById(screenshot_id);
+    if (!screenshot) {
+      return next(new CustomError("Screenshot not found", 404));
+    }
+    const user = await User.findById(req.user?.id);
+    if (!user) {
+      return next(new CustomError("User not found", 404));
+    }
+    const game = await Games.findById(game_id);
+    if (!game) {
+      return next(new CustomError("Game not found", 404));
+    }
+    const userScreenshots = await Screenshot.find({ user: req.user?.id });
+    const gameScreenshots = await Screenshot.find({ game: game_id });
+    await s3Deletev2(screenshot.key, req.file);
+    await Screenshot.findByIdAndDelete(screenshot_id);
+    user.screenshotSize = userScreenshots.length - 1;
+    game.screenshotSize = gameScreenshots.length - 1;
+    await user.save();
+    await game.save();
+    return res.status(200).json({
+      success: true,
+      message: `Screenshot ${screenshot_id} has been deleted from game ${game_id}`
+    });
+  }
+);
+const getScreenshot = asyncErrorWrapper(
+  async (req: Request, res: any, next: NextFunction) => {
+    try {
+      const { game_id } = req.params;
+      const userGames = await Screenshot.find({ game: game_id }).sort({
+        _id: -1
+      });
       return res.status(200).json({
         success: true,
-        data: screenshot
+        data: userGames
       });
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
     }
-  } else {
-    return next(new CustomError(`${type} - Invalid Type`, 400));
   }
-});
+);
 
-const deleteScreenshot = asyncErrorWrapper(async (req, res, next) => {
-  const { game_id, screenshot_id } = req.params;
-  const screenshot = await findScreenshotByIdOrError(screenshot_id, next);
-  const user = await findUserByIdOrError(req.user.id, next);
-  const game = await findGameByIdOrError(game_id, next);
-  const userScreenshots = await Screenshot.find({ user: req.user.id });
-  const gameScreenshots = await Screenshot.find({ game: game_id });
-  await s3Deletev2(screenshot.key, req.file);
-  await Screenshot.findByIdAndDelete(screenshot_id);
-  user.screenshotSize = userScreenshots.length - 1;
-  game.screenshotSize = gameScreenshots.length - 1;
-  await user.save();
-  await game.save();
-  return res.status(200).json({
-    success: true,
-    message: `Screenshot ${screenshot_id} has been deleted from game ${game_id}`
-  });
-});
-const getScreenshot = asyncErrorWrapper(async (req, res, next) => {
-  try {
-    const { game_id } = req.params;
-    const userGames = await Screenshot.find({ game: game_id }).sort({
-      _id: -1
-    });
-    return res.status(200).json({
-      success: true,
-      data: userGames
-    });
-  } catch (error) {
-    console.error("ERROR: ", error);
-    return next(new CustomError(`Error: ${error}`, 404));
-  }
-});
+const getRandomScreenshots = asyncErrorWrapper(
+  async (req: Request, res: any, next: NextFunction) => {
+    try {
+      const allScreenshots = await Screenshot.find();
+      const screenshotCount = req.params.count ? parseInt(req.params.count) : 1;
+      if (allScreenshots.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: "No screenshots found in the collection"
+        });
+      }
 
-const getRandomScreenshots = asyncErrorWrapper(async (req, res, next) => {
-  try {
-    const allScreenshots = await Screenshot.find();
-    const screenshotCount = req.params.count ? parseInt(req.params.count) : 1;
-    if (allScreenshots.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: "No screenshots found in the collection"
+      if (screenshotCount > allScreenshots.length) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "Requested number of screenshots exceeds the available unique screenshots"
+        });
+      }
+
+      const selectedScreenshots = [];
+      while (selectedScreenshots.length < screenshotCount) {
+        const randomIndex = Math.floor(Math.random() * allScreenshots.length);
+        const randomScreenshot = allScreenshots.splice(randomIndex, 1)[0];
+        selectedScreenshots.push(randomScreenshot);
+      }
+      return res.status(200).json({
+        success: true,
+        data: selectedScreenshots
       });
+    } catch (error) {
+      console.error("ERROR: ", error);
+      return next(new CustomError(`Error: ${error}`, 404));
     }
-
-    if (screenshotCount > allScreenshots.length) {
-      return res.status(400).json({
-        success: false,
-        error:
-          "Requested number of screenshots exceeds the available unique screenshots"
-      });
-    }
-
-    const selectedScreenshots = [];
-    while (selectedScreenshots.length < screenshotCount) {
-      const randomIndex = Math.floor(Math.random() * allScreenshots.length);
-      const randomScreenshot = allScreenshots.splice(randomIndex, 1)[0];
-      selectedScreenshots.push(randomScreenshot);
-    }
-    return res.status(200).json({
-      success: true,
-      data: selectedScreenshots
-    });
-  } catch (error) {
-    console.error("ERROR: ", error);
-    return next(new CustomError(`Error: ${error}`, 404));
   }
-});
+);
 
 export {
   addScreenShot,
-  editScreenshot,
   deleteScreenshot,
-  getScreenshot,
-  getRandomScreenshots
+  editScreenshot,
+  getRandomScreenshots,
+  getScreenshot
 };

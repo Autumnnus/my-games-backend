@@ -1,6 +1,12 @@
+import { NextFunction, Request, Response } from "express";
 import CustomError from "../../helpers/errors/CustomError";
 
-function errorHandler(err, req, res, next) {
+function errorHandler(
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   if (!(err instanceof CustomError)) {
     err = new CustomError("Something went wrong", 500);
   }

@@ -1,12 +1,26 @@
-const asyncErrorWrapper = require("express-async-handler");
-const {
+import { NextFunction, Request, Response } from "express";
+import asyncErrorWrapper from "express-async-handler";
+import {
   paginationHelper,
-  searchHelper,
-  productSortHelper
-} = require("./queryHelpers");
+  productSortHelper,
+  searchHelper
+} from "./queryHelpers";
 
-const userQueryMiddleware = function (model) {
-  return asyncErrorWrapper(async function (req, res, next) {
+interface CustomResponse extends Response {
+  queryResults?: {
+    success: boolean;
+    count: number;
+    pagination: any;
+    data: any[];
+  };
+}
+
+const userQueryMiddleware = function (model: any) {
+  return asyncErrorWrapper(async function (
+    req: Request,
+    res: CustomResponse,
+    next: NextFunction
+  ) {
     let query = model.find();
 
     query = searchHelper("name", query, req);
