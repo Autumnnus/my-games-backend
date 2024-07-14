@@ -58,4 +58,3 @@ const checkIsAdmin = asyncErrorWrapper(
 );
 
 export { checkGameExist, checkGameSSExist, checkIsAdmin, checkUserExist };
-

@@ -1,4 +1,3 @@
-import { color } from "console-log-colors";
 import { NextFunction, Request, Response } from "express";
 import asyncErrorWrapper from "express-async-handler";
 import CustomError from "../helpers/errors/CustomError";

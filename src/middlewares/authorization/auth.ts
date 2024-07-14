@@ -12,10 +12,10 @@ import Screenshot from "../../models/Screenshot";
 import { AuthenticatedRequest } from "../../types/request";
 dotenv.config();
 
-type DecodedToken= {
+type DecodedToken = {
   id: string;
   name: string;
-}
+};
 
 const getAccessToRoute = (
   req: AuthenticatedRequest,
@@ -77,4 +77,3 @@ const getGameSSOwnerAccess = asyncErrorWrapper(
 );
 
 export { getAccessToRoute, getGameOwnerAccess, getGameSSOwnerAccess };
-

@@ -4,7 +4,7 @@ import { UserData } from "../../types/models";
 type User = {
   generateJwtFromUser(): string;
   _id: string;
-} &UserData
+} & UserData;
 
 const generateAccessToken = (user: User, res: Response) => {
   const token = user.generateJwtFromUser();
@@ -36,9 +36,8 @@ const generateAccessToken = (user: User, res: Response) => {
 };
 
 const isTokenIncluded = (req: Request): boolean => {
-  return (
-    req.headers.authorization && req.headers.authorization.startsWith("Bearer:")
-  ) as never
+  return (req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer:")) as never;
 };
 
 const getAccessTokenFromHeader = (req: Request): string => {
@@ -48,4 +47,3 @@ const getAccessTokenFromHeader = (req: Request): string => {
 };
 
 export { generateAccessToken, getAccessTokenFromHeader, isTokenIncluded };
-

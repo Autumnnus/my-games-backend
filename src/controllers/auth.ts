@@ -157,23 +157,19 @@ const editUser = asyncErrorWrapper(
       //     .json({ success: false, message: "No changes detected email" });
       // }
       if (editInformation.name && editInformation.name === user?.name) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "No changes detected name"
-          }) as never;
+        return res.status(400).json({
+          success: false,
+          message: "No changes detected name"
+        }) as never;
       }
       if (
         editInformation.password &&
         comparePassword(editInformation.password, user.password)
       ) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "No changes detected password"
-          }) as never;
+        return res.status(400).json({
+          success: false,
+          message: "No changes detected password"
+        }) as never;
       }
       if (
         editInformation.profileImage &&
@@ -295,4 +291,3 @@ export {
   validateEmail,
   verifyAccount
 };
-
