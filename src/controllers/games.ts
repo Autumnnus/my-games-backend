@@ -157,7 +157,6 @@ const getUserGames = asyncErrorWrapper(
     let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
       lastPlay: -1
     };
-    console.log(color.red(sortCriteria));
     const matchCriteria: {
       [key: string]: string | { $regex: unknown; $options: string };
     } = { userId: id };

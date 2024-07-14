@@ -161,7 +161,6 @@ const editScreenshot = asyncErrorWrapper(
               return next(new CustomError("Error uploading file", 500));
             }
           } else if (isSendData(awsFile)) {
-            console.log("AWS FILE ", awsFile);
             urlToUpdate = awsFile.Location;
             keyToUpdate = awsFile.Key;
           }
