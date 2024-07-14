@@ -13,7 +13,6 @@ import { getAccessToRoute } from "../../middlewares/authorization/auth";
 
 const router = express.Router();
 
-// Define routes
 router.post("/register", register);
 router.post("/login", login);
 router.get("/logout", getAccessToRoute, logout);

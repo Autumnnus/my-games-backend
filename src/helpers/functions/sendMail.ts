@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 import CustomError from "../errors/CustomError";
 
-interface User {
-  email: string;
-  resetPasswordToken?: string;
-  resetPasswordExpire?: Date;
-  verificationToken?: string;
-  verificationExpire?: Date;
-  save: () => Promise<void>;
-}
+// interface User {
+//   email: string;
+//   resetPasswordToken?: string;
+//   resetPasswordExpire?: Date;
+//   verificationToken?: string;
+//   verificationExpire?: Date;
+//   save: () => Promise<void>;
+// }
 
 interface MailContent {
   body: {

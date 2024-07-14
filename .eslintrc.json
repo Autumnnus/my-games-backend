@@ -11,6 +11,7 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
-    "no-useless-escape": "off"
+    "no-useless-escape": "off",
+    "@typescript-eslint/ban-ts-comment": "off"
   }
 }

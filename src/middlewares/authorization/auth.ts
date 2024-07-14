@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import asyncErrorWrapper from "express-async-handler";
 import jwt from "jsonwebtoken";
 import {
@@ -9,17 +9,16 @@ import {
 import CustomError from "../../helpers/errors/CustomError";
 import Games from "../../models/Games";
 import Screenshot from "../../models/Screenshot";
+import { AuthenticatedRequest } from "../../types/request";
 dotenv.config();
 
-type CustomRequest = Request & {
-  user?: {
-    id: string;
-    name: string;
-  };
-};
+type DecodedToken= {
+  id: string;
+  name: string;
+}
 
 const getAccessToRoute = (
-  req: CustomRequest,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -35,13 +34,14 @@ const getAccessToRoute = (
   jwt.verify(
     accessToken,
     process.env.ACCESS_TOKEN_SECRET,
-    (err: any, decoded: any) => {
+    //@ts-ignore
+    (err: jwt.VerifyErrors | null, decoded: DecodedToken | undefined) => {
       if (err) {
         return res.status(403).json({ message: "Invalid token. Please Login" });
       }
       req.user = {
-        id: decoded.id,
-        name: decoded.name
+        id: decoded!.id,
+        name: decoded!.name
       };
       next();
     }
@@ -49,7 +49,7 @@ const getAccessToRoute = (
 };
 
 const getGameOwnerAccess = asyncErrorWrapper(
-  async (req: CustomRequest, _: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
     const userId = req.user?.id;
     const gameId = req.params.id || req.params.game_id;
     const game = await Games.findById(gameId);
@@ -61,7 +61,7 @@ const getGameOwnerAccess = asyncErrorWrapper(
 );
 
 const getGameSSOwnerAccess = asyncErrorWrapper(
-  async (req: CustomRequest, _: Response, next: NextFunction) => {
+  async (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
     const userId = req.user?.id;
     const gameId = req.params.id || req.params.game_id;
     const game = await Games.findById(gameId);
@@ -77,3 +77,4 @@ const getGameSSOwnerAccess = asyncErrorWrapper(
 );
 
 export { getAccessToRoute, getGameOwnerAccess, getGameSSOwnerAccess };
+

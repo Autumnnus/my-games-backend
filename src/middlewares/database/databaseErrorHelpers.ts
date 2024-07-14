@@ -4,6 +4,7 @@ import CustomError from "../../helpers/errors/CustomError";
 import Games from "../../models/Games";
 import Screenshot from "../../models/Screenshot";
 import User from "../../models/User";
+import { AuthenticatedRequest } from "../../types/request";
 
 const checkUserExist = asyncErrorWrapper(
   async (req: Request, _: Response, next: NextFunction) => {
@@ -46,8 +47,8 @@ const checkGameSSExist = asyncErrorWrapper(
 );
 
 const checkIsAdmin = asyncErrorWrapper(
-  async (req: Request, _: Response, next: NextFunction) => {
-    const user = await User.findById((req as any).user.id);
+  async (req: AuthenticatedRequest, _: Response, next: NextFunction) => {
+    const user = await User.findById(req.user?.id);
     const role = user?.role;
     if (role !== "admin") {
       return next(new CustomError("Only admins can access this route", 403));
@@ -57,3 +58,4 @@ const checkIsAdmin = asyncErrorWrapper(
 );
 
 export { checkGameExist, checkGameSSExist, checkIsAdmin, checkUserExist };
+
