@@ -20,6 +20,7 @@ export type GamesData = {
   rating?: number;
   status: "completed" | "abandoned" | "toBeCompleted" | "activePlaying";
   playTime: number;
+  isFavorite?: boolean;
   screenshotSize?: number;
   userId: mongoose.Schema.Types.ObjectId;
   firstFinished?: Date;
@@ -79,10 +80,11 @@ export type UserData = {
   completedGameSize?: number;
   screenshotSize?: number;
   favoriteGames?: {
-    type: mongoose.Schema.Types.ObjectId;
+    game: mongoose.Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
     name: string;
-    rating: number;
-    photo: string;
+    rating?: number;
+    photo?: string;
     ref: "Games";
   }[];
   createdAt: Date;

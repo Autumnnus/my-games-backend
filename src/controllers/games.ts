@@ -152,13 +152,15 @@ const deleteGame = asyncErrorWrapper(
 const getUserGames = asyncErrorWrapper(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-    const { order, sortBy, search } = req.query;
+    const { order, sortBy, search, page, limit } = req.query;
+
     let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
       lastPlay: -1
     };
     const matchCriteria: {
       [key: string]: string | { $regex: unknown; $options: string };
     } = { userId: id };
+
     if (sortBy) {
       sortCriteria = { [sortBy as string]: order === "asc" ? 1 : -1 };
     }
@@ -167,7 +169,16 @@ const getUserGames = asyncErrorWrapper(
     }
 
     try {
-      const userGames = await Games.find(matchCriteria).sort(sortCriteria);
+      const pageNum = page ? parseInt(page as string, 10) : 1;
+      const limitNum = limit ? parseInt(limit as string, 10) : 0;
+      const skip = (pageNum - 1) * limitNum;
+
+      const userGamesQuery = Games.find(matchCriteria).sort(sortCriteria);
+      if (limitNum > 0) {
+        userGamesQuery.skip(skip).limit(limitNum);
+      }
+
+      const userGames = await userGamesQuery;
       return res.status(200).json({
         success: true,
         data: userGames
@@ -200,4 +211,93 @@ const getUserGameDetail = asyncErrorWrapper(
   }
 );
 
-export { addNewGame, deleteGame, editGame, getUserGameDetail, getUserGames };
+const setFavoriteGames = asyncErrorWrapper(
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const { first_game, second_game, third_game } = req.body;
+
+    try {
+      const user = await User.findById(req.user?.id);
+      if (!user) {
+        return next(new CustomError("User not found", 404));
+      }
+
+      const gameIds = [first_game, second_game, third_game];
+      const games = await Promise.all(gameIds.map((id) => Games.findById(id)));
+
+      for (const [index, game] of games.entries()) {
+        if (!game) {
+          return next(new CustomError(`Game ${index + 1} not found`, 404));
+        }
+        game.isFavorite = true;
+        await game.save();
+      }
+
+      await Games.updateMany(
+        { _id: { $nin: gameIds }, isFavorite: true },
+        { isFavorite: false }
+      );
+
+      user.favoriteGames = gameIds;
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        data: games.map((game) => {
+          return {
+            _id: game?._id,
+            name: game?.name,
+            photo: game?.photo,
+            rating: game?.rating
+          };
+        })
+      }) as never;
+    } catch (error) {
+      console.error("ERROR: ", error);
+      return next(new CustomError(`Error: ${error}`, 500));
+    }
+  }
+);
+
+const getFavoriteGames = asyncErrorWrapper(
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { user_id } = req.params;
+      const user = await User.findById(user_id).populate("favoriteGames");
+      if (!user) {
+        return next(new CustomError("User not found", 404));
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: user.favoriteGames?.map((game) => {
+          return {
+            _id: game._id,
+            name: game.name,
+            photo: game.photo,
+            rating: game.rating
+          };
+        })
+      }) as never;
+    } catch (error) {
+      console.error("ERROR: ", error);
+      return next(new CustomError(`Error: ${error}`, 500));
+    }
+  }
+);
+
+export {
+  addNewGame,
+  deleteGame,
+  editGame,
+  getFavoriteGames,
+  getUserGameDetail,
+  getUserGames,
+  setFavoriteGames
+};
