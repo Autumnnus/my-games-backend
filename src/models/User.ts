@@ -54,9 +54,7 @@ const UserSchema = new Schema<UserData & Document>(
     favoriteGames: [
       {
         type: mongoose.Schema.ObjectId,
-        name: String,
-        rating: Number,
-        photo: String,
+        game: mongoose.Schema.ObjectId,
         ref: "Games"
       }
     ]

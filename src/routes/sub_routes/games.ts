@@ -3,8 +3,10 @@ import {
   addNewGame,
   deleteGame,
   editGame,
+  getFavoriteGames,
   getUserGameDetail,
-  getUserGames
+  getUserGames,
+  setFavoriteGames
 } from "../../controllers/games";
 import {
   getAccessToRoute,
@@ -27,5 +29,7 @@ router.put(
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   editGame
 );
+router.post("/setFavoriteGames", getAccessToRoute, setFavoriteGames);
+router.get("/getFavoriteGames/:user_id",  getFavoriteGames);
 
 export default router;

@@ -54,6 +54,10 @@ const GamesSchema = new Schema<Document & slugData & GamesData>(
       required: true,
       ref: "User"
     },
+    isFavorite: {
+      type: Boolean,
+      default: false
+    },
     firstFinished: Date,
     igdb: {
       id: Number,
