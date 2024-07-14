@@ -1,4 +1,4 @@
-import { color } from 'console-log-colors';
+import { color } from "console-log-colors";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -16,5 +16,5 @@ app.use(express.json());
 app.use("/api", routers);
 app.use(errorHandler);
 app.listen(PORT, () => {
-  console.log(color.bgCyan(`Server is running on port ${PORT}...`))
+  console.log(color.bgCyan(`Server is running on port ${PORT}...`));
 });

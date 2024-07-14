@@ -19,22 +19,24 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-const register = asyncErrorWrapper(async (req: Request, res: any) => {
-  const { email, name, password } = req.body;
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    return res
-      .status(400)
-      .json({ success: false, message: "This user already exists" });
+const register = asyncErrorWrapper(
+  async (req: Request, res: Response): Promise<void> => {
+    const { email, name, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: "This user already exists" }) as never;
+    }
+    if (!validateUserInput(email, password)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please check your inputs" }) as never;
+    }
+    const newUser = await User.create({ email, name, password });
+    generateAccessToken(newUser, res);
   }
-  if (!validateUserInput(email, password)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Please check your inputs" });
-  }
-  const newUser = await User.create({ email, name, password });
-  generateAccessToken(newUser, res);
-});
+);
 
 const login = asyncErrorWrapper(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -43,19 +45,22 @@ const login = asyncErrorWrapper(
       return next(new CustomError("Please check your inputs", 400));
     }
     const user = await User.findOne({ email }).select("+password");
-    if (!comparePassword(password, user?.password||"")) {
+    if (!comparePassword(password, user?.password || "")) {
       return next(new CustomError("Please check your password", 400));
+    }
+    if (!user) {
+      return next(new CustomError("User not found", 404));
     }
     generateAccessToken(user, res);
   }
 );
 
 const logout = asyncErrorWrapper(
-  async (_req: Request, res: any, next: NextFunction) => {
+  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       return res
         .status(200)
-        .cookie({
+        .cookie("cookieName", "cookieValue", {
           httpOnly: true,
           expires: new Date(Date.now()),
           secure: process.env.NODE_ENV === "development" ? false : true
@@ -63,7 +68,7 @@ const logout = asyncErrorWrapper(
         .json({
           success: true,
           message: "Logout Successful"
-        });
+        }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -72,7 +77,7 @@ const logout = asyncErrorWrapper(
 );
 
 const forgotPassword = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const email = req.body.email;
     const user = await User.findOne({ email });
     if (!user) {
@@ -95,7 +100,7 @@ const forgotPassword = asyncErrorWrapper(
         msg: "Email Sent",
         info: info,
         preview: nodemailer.getTestMessageUrl(info)
-      });
+      }) as never;
     } catch (err) {
       return next(err);
     }
@@ -103,7 +108,7 @@ const forgotPassword = asyncErrorWrapper(
 );
 
 const resetPassword = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { resetPasswordToken } = req.query;
     const { password } = req.body;
     try {
@@ -124,7 +129,7 @@ const resetPassword = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         message: "Reset Password Process Success"
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -133,7 +138,11 @@ const resetPassword = asyncErrorWrapper(
 );
 
 const editUser = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const editInformation = req.body;
     try {
       // const user = await findUserByIdOrError(req.user?.id ||"", next);
@@ -150,7 +159,10 @@ const editUser = asyncErrorWrapper(
       if (editInformation.name && editInformation.name === user?.name) {
         return res
           .status(400)
-          .json({ success: false, message: "No changes detected name" });
+          .json({
+            success: false,
+            message: "No changes detected name"
+          }) as never;
       }
       if (
         editInformation.password &&
@@ -158,7 +170,10 @@ const editUser = asyncErrorWrapper(
       ) {
         return res
           .status(400)
-          .json({ success: false, message: "No changes detected password" });
+          .json({
+            success: false,
+            message: "No changes detected password"
+          }) as never;
       }
       if (
         editInformation.profileImage &&
@@ -167,7 +182,7 @@ const editUser = asyncErrorWrapper(
         return res.status(400).json({
           success: false,
           message: "No changes detected profileImage"
-        });
+        }) as never;
       }
       //? EDIT
       // if (editInformation.email) {
@@ -199,7 +214,7 @@ const editUser = asyncErrorWrapper(
         success: true,
         message: JSON.stringify(editInformation),
         data: updatedUser
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -208,7 +223,7 @@ const editUser = asyncErrorWrapper(
 );
 
 const validateEmail = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const resetEmail = req.body.email;
     const user = await User.findOne({ email: resetEmail });
     if (!user) {
@@ -234,7 +249,7 @@ const validateEmail = asyncErrorWrapper(
         msg: "Email Sent",
         info: info,
         preview: nodemailer.getTestMessageUrl(info)
-      });
+      }) as never;
     } catch (err) {
       return next(err);
     }
@@ -242,7 +257,7 @@ const validateEmail = asyncErrorWrapper(
 );
 
 const verifyAccount = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { verificationToken } = req.query;
     try {
       if (!verificationToken) {
@@ -262,7 +277,7 @@ const verifyAccount = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         message: "Account Verification Process Success"
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -280,3 +295,4 @@ export {
   validateEmail,
   verifyAccount
 };
+

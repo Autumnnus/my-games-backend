@@ -1,3 +1,4 @@
+import { color } from "console-log-colors";
 import { NextFunction, Request, Response } from "express";
 import asyncErrorWrapper from "express-async-handler";
 import CustomError from "../helpers/errors/CustomError";
@@ -12,7 +13,11 @@ export interface AuthenticatedRequest extends Request {
 }
 
 const addNewGame = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const { status } = req.body;
     try {
       const game = await Games.create({
@@ -33,7 +38,7 @@ const addNewGame = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         data: game
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -42,7 +47,11 @@ const addNewGame = asyncErrorWrapper(
 );
 
 const editGame = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const { id } = req.params;
     const {
       name,
@@ -98,7 +107,7 @@ const editGame = asyncErrorWrapper(
           _id: game._id,
           ...updatedGameFields
         }
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -107,7 +116,11 @@ const editGame = asyncErrorWrapper(
 );
 
 const deleteGame = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const { id } = req.params;
     try {
       const game = await Games.findById(id);
@@ -138,11 +151,16 @@ const deleteGame = asyncErrorWrapper(
   }
 );
 const getUserGames = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const { order, sortBy, search } = req.query;
-    let sortCriteria: any = { lastPlay: -1 };
-    const matchCriteria: any = { userId: id };
+    let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
+      lastPlay: -1
+    };
+    console.log(color.red(sortCriteria));
+    const matchCriteria: {
+      [key: string]: string | { $regex: unknown; $options: string };
+    } = { userId: id };
     if (sortBy) {
       sortCriteria = { [sortBy as string]: order === "asc" ? 1 : -1 };
     }
@@ -155,7 +173,7 @@ const getUserGames = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         data: userGames
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -164,7 +182,7 @@ const getUserGames = asyncErrorWrapper(
 );
 
 const getUserGameDetail = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { game_id } = req.params;
     try {
       const game = await findGameByIdOrError(game_id, next);
@@ -176,10 +194,10 @@ const getUserGameDetail = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         data: game
-      });
-    } catch (error: any) {
+      }) as never;
+    } catch (error) {
       console.error("ERROR: ", error);
-      return next(new CustomError(`Error: ${error.message}`, 500));
+      return next(new CustomError(`Error: ${error}`, 500));
     }
   }
 );

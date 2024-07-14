@@ -1,13 +1,12 @@
+import { Request, Response } from "express";
+import { UserData } from "../../types/models";
+
 type User = {
   generateJwtFromUser(): string;
-  name: string;
-  email: string;
-  isVerified: boolean;
-  role: string;
   _id: string;
-};
+} &UserData
 
-const generateAccessToken = (user: any, res: any): any => {
+const generateAccessToken = (user: User, res: Response) => {
   const token = user.generateJwtFromUser();
   const jwtCookie = process.env.JWT_COOKIE;
 
@@ -15,7 +14,7 @@ const generateAccessToken = (user: any, res: any): any => {
     throw new Error("JWT_COOKIE environment variable is not defined.");
   }
 
-  const expires = new Date(Date.now() + parseInt(jwtCookie) * 1000 * 60);
+  // const expires = new Date(Date.now() + parseInt(jwtCookie) * 1000 * 60);
 
   return res
     .status(200)
@@ -36,16 +35,17 @@ const generateAccessToken = (user: any, res: any): any => {
     });
 };
 
-const isTokenIncluded = (req: any): boolean => {
+const isTokenIncluded = (req: Request): boolean => {
   return (
     req.headers.authorization && req.headers.authorization.startsWith("Bearer:")
-  );
+  ) as never
 };
 
-const getAccessTokenFromHeader = (req: any): string => {
+const getAccessTokenFromHeader = (req: Request): string => {
   const authorization = req.headers.authorization;
   const access_token = authorization?.split(" ")[1];
-  return access_token;
+  return access_token as never;
 };
 
 export { generateAccessToken, getAccessTokenFromHeader, isTokenIncluded };
+

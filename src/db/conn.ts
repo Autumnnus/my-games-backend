@@ -9,7 +9,7 @@ const connectDatabase = async () => {
       throw new Error("MONGO_URI must be provided in .env file");
     }
     const connect = await mongoose.connect(process.env.MONGO_URI);
-    console.log(color.c106(`MongoDB connect: ${connect.connection.host}`))
+    console.log(color.c106(`MongoDB connect: ${connect.connection.host}`));
     return connect;
   } catch (error) {
     console.error(error);

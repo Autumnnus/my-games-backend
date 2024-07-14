@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import asyncErrorWrapper from "express-async-handler";
-import { s3Deletev2, s3Updatev2, s3Uploadv2 } from "../../s3Service";
 import CustomError from "../helpers/errors/CustomError";
 import { findScreenshotByIdOrError } from "../helpers/functions/findById";
 import { isErrorData, isSendData } from "../helpers/functions/s3IsSendData";
 import Games from "../models/Games";
 import Screenshot from "../models/Screenshot";
 import User from "../models/User";
+import { s3Deletev2, s3Updatev2, s3Uploadv2 } from "../services/s3Service";
+import { ScreenshotData } from "../types/models";
 import { AuthenticatedRequest } from "./games";
 
 interface AuthenticatedFileRequest extends Request {
@@ -69,7 +70,7 @@ const addScreenShot = async (
       const screenshots = [];
       for (const file of req.files) {
         const awsFile = await s3Uploadv2(file);
-        let screenshot: any;
+        let screenshot: ScreenshotData | undefined;
         if (isErrorData(awsFile)) {
           if (awsFile.success === false) {
             return next(new CustomError("Error uploading file", 500));
@@ -104,7 +105,11 @@ const addScreenShot = async (
 };
 
 const editScreenshot = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const { game_id, screenshot_id } = req.params;
     const { name, type, url } = req.body;
     const user = await User.findById(req.user?.id);
@@ -132,7 +137,7 @@ const editScreenshot = asyncErrorWrapper(
         return res.status(200).json({
           success: true,
           data: screenshot
-        });
+        }) as never;
       } catch (error) {
         console.error("ERROR: ", error);
         return next(new CustomError(`Error: ${error}`, 404));
@@ -169,7 +174,7 @@ const editScreenshot = asyncErrorWrapper(
         return res.status(200).json({
           success: true,
           data: screenshot
-        });
+        }) as never;
       } catch (error) {
         console.error("ERROR: ", error);
         return next(new CustomError(`Error: ${error}`, 404));
@@ -181,7 +186,11 @@ const editScreenshot = asyncErrorWrapper(
 );
 
 const deleteScreenshot = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const { game_id, screenshot_id } = req.params;
     const screenshot = await Screenshot.findById(screenshot_id);
     if (!screenshot) {
@@ -206,11 +215,11 @@ const deleteScreenshot = asyncErrorWrapper(
     return res.status(200).json({
       success: true,
       message: `Screenshot ${screenshot_id} has been deleted from game ${game_id}`
-    });
+    }) as never;
   }
 );
 const getScreenshot = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { game_id } = req.params;
       const userGames = await Screenshot.find({ game: game_id }).sort({
@@ -219,7 +228,7 @@ const getScreenshot = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         data: userGames
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -228,7 +237,7 @@ const getScreenshot = asyncErrorWrapper(
 );
 
 const getRandomScreenshots = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const allScreenshots = await Screenshot.find();
       const screenshotCount = req.params.count ? parseInt(req.params.count) : 1;
@@ -236,7 +245,7 @@ const getRandomScreenshots = asyncErrorWrapper(
         return res.status(404).json({
           success: false,
           error: "No screenshots found in the collection"
-        });
+        }) as never;
       }
 
       if (screenshotCount > allScreenshots.length) {
@@ -244,7 +253,7 @@ const getRandomScreenshots = asyncErrorWrapper(
           success: false,
           error:
             "Requested number of screenshots exceeds the available unique screenshots"
-        });
+        }) as never;
       }
 
       const selectedScreenshots = [];
@@ -256,7 +265,7 @@ const getRandomScreenshots = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         data: selectedScreenshots
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));

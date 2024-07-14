@@ -1,73 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import slugify from "slugify";
+import { GamesData } from "../types/models";
 
-type IGames = Document & {
-  name: string;
-  photo?: string;
-  lastPlay: Date;
-  platform:
-    | "steam"
-    | "epicGames"
-    | "ubisoft"
-    | "xboxPc"
-    | "eaGames"
-    | "torrent"
-    | "playstation"
-    | "xboxSeries"
-    | "nintendo"
-    | "mobile"
-    | "otherPlatforms";
-  review?: string;
-  rating?: number;
-  status: "completed" | "abandoned" | "toBeCompleted" | "activePlaying";
-  playTime: number;
-  screenshotSize?: number;
-  userId: mongoose.Schema.Types.ObjectId;
-  firstFinished?: Date;
-  igdb?: {
-    id: number;
-    cover: {
-      id: number;
-      url: string;
-      game: number;
-    };
-    aggregated_rating?: number;
-    aggregated_rating_count?: number;
-    game_modes?: {
-      id: number;
-      name: string;
-    }[];
-    genres?: {
-      id: number;
-      name: string;
-    }[];
-    developers?: {
-      id: number;
-      name: string;
-    }[];
-    publishers?: {
-      id: number;
-      name: string;
-    }[];
-    player_perspectives?: {
-      id: number;
-      name: string;
-    }[];
-    release_date?: {
-      id: number;
-      date: number;
-    };
-    themes?: {
-      id: number;
-      name: string;
-    }[];
-  };
-  slug?: string;
-
+type slugData = {
   makeSlug(): string;
 };
 
-const GamesSchema = new Schema<IGames>(
+const GamesSchema = new Schema<Document & slugData & GamesData>(
   {
     name: {
       type: String,

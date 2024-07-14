@@ -9,7 +9,7 @@
     "start": "node ./src/index.ts",
     "dev": "nodemon ./src/index.ts",
     "format": "prettier --write .",
-    "lint": "eslint .",
+    "lint": "eslint src/**/*.{js,jsx,ts,tsx,json}",
     "lint:fix": "eslint --fix ."
   },
   "keywords": [],
@@ -44,11 +44,19 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/nodemailer": "^6.4.14",
     "@types/uuid": "^10.0.0",
-    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "eslint": ">=8.56.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-config-xo": "^0.45.0",
+    "eslint-config-xo-typescript": "^4.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": ">=5.0.0"
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { S3 } from "aws-sdk";
 import dotenv from "dotenv";
 import { v4 as uuid } from "uuid";

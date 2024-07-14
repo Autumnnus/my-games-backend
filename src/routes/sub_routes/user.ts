@@ -5,12 +5,10 @@ import {
   checkIsAdmin,
   checkUserExist
 } from "../../middlewares/database/databaseErrorHelpers";
-import userQueryMiddleware from "../../middlewares/query/userQuery";
-import User from "../../models/User";
 
 const router = express.Router();
 
-router.get("/", userQueryMiddleware(User), getAllUsers);
+router.get("/", getAllUsers);
 router.get("/:id", checkUserExist, getSingleUser);
 router.delete(
   "/deleteUser/:id",

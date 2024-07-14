@@ -1,18 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { ScreenshotData } from "../types/models";
 
-type ScreenshotData = Document & {
-  name?: string;
-  url: string;
-  thumbnail?: string;
-  key?: string;
-  user: mongoose.Schema.Types.ObjectId;
-  game: mongoose.Schema.Types.ObjectId;
-  type: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-const ScreenshotSchema = new Schema<ScreenshotData>(
+const ScreenshotSchema = new Schema<ScreenshotData & Document>(
   {
     name: String,
     _id: {

@@ -1,22 +1,22 @@
-import { NextFunction, Request } from "express";
+import { NextFunction, Request, Response } from "express";
 import asyncErrorWrapper from "express-async-handler";
-import { s3Deletev2 } from "../../s3Service";
 import CustomError from "../helpers/errors/CustomError";
 import { findUserByIdOrError } from "../helpers/functions/findById";
 import Games from "../models/Games";
 import Screenshot from "../models/Screenshot";
 import User from "../models/User";
+import { s3Deletev2 } from "../services/s3Service";
 import { AuthenticatedRequest } from "./games";
 
 const getSingleUser = asyncErrorWrapper(
-  async (req: Request, res: any, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     try {
       const user = await User.findById(id);
       return res.status(200).json({
         success: true,
         data: user
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -25,13 +25,13 @@ const getSingleUser = asyncErrorWrapper(
 );
 
 const getAllUsers = asyncErrorWrapper(
-  async (_, res: any, next: NextFunction) => {
+  async (_, res: Response, next: NextFunction): Promise<void> => {
     try {
       const users = await User.find().select("-password");
       return res.status(200).json({
         success: true,
         data: users
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));
@@ -40,7 +40,11 @@ const getAllUsers = asyncErrorWrapper(
 );
 
 const deleteUser = asyncErrorWrapper(
-  async (req: AuthenticatedRequest, res: any, next: NextFunction) => {
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     const { id } = req.params;
     try {
       const user = await findUserByIdOrError(req.user?.id || "", next);
@@ -67,7 +71,7 @@ const deleteUser = asyncErrorWrapper(
       return res.status(200).json({
         success: true,
         message: `User with id ${id} has been deleted`
-      });
+      }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
       return next(new CustomError(`Error: ${error}`, 404));

@@ -2,36 +2,9 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import mongoose, { Document, Schema } from "mongoose";
+import { UserData } from "../types/models";
 
-export type UserData = Document & {
-  name: string;
-  password: string;
-  email: string;
-  isVerified?: boolean;
-  verificationToken?: string;
-  verificationExpire?: Date;
-  resetPasswordToken?: string;
-  resetPasswordExpire?: Date;
-  profileImage?: string;
-  role?: string;
-  gameSize?: number;
-  completedGameSize?: number;
-  screenshotSize?: number;
-  favoriteGames?: {
-    type: mongoose.Schema.Types.ObjectId;
-    name: string;
-    rating: number;
-    photo: string;
-    ref: "Games";
-  }[];
-  createdAt: Date;
-  updatedAt: Date;
-  getResetPasswordTokenFromUser(): string;
-  generateJwtFromUser(): string;
-  getVerificationTokenFromUser(): string;
-};
-
-const UserSchema = new Schema<UserData>(
+const UserSchema = new Schema<UserData & Document>(
   {
     name: {
       type: String,
