@@ -43,7 +43,7 @@ const login = asyncErrorWrapper(
       return next(new CustomError("Please check your inputs", 400));
     }
     const user = await User.findOne({ email }).select("+password");
-    if (!comparePassword(password, user?.password)) {
+    if (!comparePassword(password, user?.password||"")) {
       return next(new CustomError("Please check your password", 400));
     }
     generateAccessToken(user, res);

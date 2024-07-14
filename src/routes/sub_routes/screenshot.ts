@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import {
   addScreenShot,
   deleteScreenshot,
@@ -25,7 +25,7 @@ router.post(
   "/add/:game_id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   upload.array("file", 50),
-  addScreenShot
+  addScreenShot as RequestHandler
 );
 router.delete(
   "/delete/:game_id/:screenshot_id",

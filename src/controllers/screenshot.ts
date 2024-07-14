@@ -3,6 +3,7 @@ import asyncErrorWrapper from "express-async-handler";
 import { s3Deletev2, s3Updatev2, s3Uploadv2 } from "../../s3Service";
 import CustomError from "../helpers/errors/CustomError";
 import { findScreenshotByIdOrError } from "../helpers/functions/findById";
+import { isErrorData, isSendData } from "../helpers/functions/s3IsSendData";
 import Games from "../models/Games";
 import Screenshot from "../models/Screenshot";
 import User from "../models/User";
@@ -68,14 +69,21 @@ const addScreenShot = async (
       const screenshots = [];
       for (const file of req.files) {
         const awsFile = await s3Uploadv2(file);
-        const screenshot = await Screenshot.create({
-          name,
-          url: awsFile.Location,
-          user: req.user?.id,
-          key: awsFile.key,
-          game: game_id,
-          type: "image"
-        });
+        let screenshot: any;
+        if (isErrorData(awsFile)) {
+          if (awsFile.success === false) {
+            return next(new CustomError("Error uploading file", 500));
+          }
+        } else if (isSendData(awsFile)) {
+          screenshot = await Screenshot.create({
+            name,
+            url: awsFile.Location,
+            user: req.user?.id,
+            key: awsFile.Key,
+            game: game_id,
+            type: "image"
+          });
+        }
         screenshots.push(screenshot);
         user.screenshotSize = userScreenshots.length + req.files.length;
         game.screenshotSize = gameScreenshots.length + req.files.length;
@@ -143,8 +151,15 @@ const editScreenshot = asyncErrorWrapper(
             screenshot.key || req.file.originalname,
             req.file
           );
-          urlToUpdate = awsFile.Location;
-          keyToUpdate = awsFile.key;
+          if (isErrorData(awsFile)) {
+            if (!awsFile.success) {
+              return next(new CustomError("Error uploading file", 500));
+            }
+          } else if (isSendData(awsFile)) {
+            console.log("AWS FILE ", awsFile);
+            urlToUpdate = awsFile.Location;
+            keyToUpdate = awsFile.Key;
+          }
         }
         screenshot.name = name ? name : null;
         screenshot.url = urlToUpdate;
@@ -182,7 +197,7 @@ const deleteScreenshot = asyncErrorWrapper(
     }
     const userScreenshots = await Screenshot.find({ user: req.user?.id });
     const gameScreenshots = await Screenshot.find({ game: game_id });
-    await s3Deletev2(screenshot.key, req.file);
+    await s3Deletev2(screenshot.key || "");
     await Screenshot.findByIdAndDelete(screenshot_id);
     user.screenshotSize = userScreenshots.length - 1;
     game.screenshotSize = gameScreenshots.length - 1;

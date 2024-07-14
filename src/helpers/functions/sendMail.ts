@@ -1,8 +1,38 @@
+import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 import CustomError from "../errors/CustomError";
-import { Mailgen } from "mailgen";
 
-const sendEmail = async (user, subject, content, url) => {
+interface User {
+  email: string;
+  resetPasswordToken?: string;
+  resetPasswordExpire?: Date;
+  verificationToken?: string;
+  verificationExpire?: Date;
+  save: () => Promise<void>;
+}
+
+interface MailContent {
+  body: {
+    greeting: string;
+    intro: string;
+    action: {
+      instructions: string;
+      button: {
+        color: string;
+        text: string;
+        link: string;
+      };
+    };
+    outro: string;
+  };
+}
+
+const sendEmail = async (
+  user: any,
+  subject: string,
+  content: string,
+  url: string
+): Promise<any> => {
   try {
     const transporter = nodemailer.createTransport({
       service: process.env.SMTP_SERVICE,
@@ -19,7 +49,7 @@ const sendEmail = async (user, subject, content, url) => {
       }
     });
 
-    const response = {
+    const response: MailContent = {
       body: {
         greeting: "Dear User",
         intro: content,
@@ -46,7 +76,7 @@ const sendEmail = async (user, subject, content, url) => {
 
     const info = await transporter.sendMail(message);
     return info;
-  } catch (err) {
+  } catch (err: any) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     user.verificationToken = undefined;
