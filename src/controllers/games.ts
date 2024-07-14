@@ -152,13 +152,15 @@ const deleteGame = asyncErrorWrapper(
 const getUserGames = asyncErrorWrapper(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
-    const { order, sortBy, search } = req.query;
+    const { order, sortBy, search, page, limit } = req.query;
+
     let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
       lastPlay: -1
     };
     const matchCriteria: {
       [key: string]: string | { $regex: unknown; $options: string };
     } = { userId: id };
+
     if (sortBy) {
       sortCriteria = { [sortBy as string]: order === "asc" ? 1 : -1 };
     }
@@ -167,7 +169,16 @@ const getUserGames = asyncErrorWrapper(
     }
 
     try {
-      const userGames = await Games.find(matchCriteria).sort(sortCriteria);
+      const pageNum = page ? parseInt(page as string, 10) : 1;
+      const limitNum = limit ? parseInt(limit as string, 10) : 0;
+      const skip = (pageNum - 1) * limitNum;
+
+      const userGamesQuery = Games.find(matchCriteria).sort(sortCriteria);
+      if (limitNum > 0) {
+        userGamesQuery.skip(skip).limit(limitNum);
+      }
+
+      const userGames = await userGamesQuery;
       return res.status(200).json({
         success: true,
         data: userGames
@@ -232,10 +243,16 @@ const setFavoriteGames = asyncErrorWrapper(
 
       user.favoriteGames = gameIds;
       await user.save();
-
       return res.status(200).json({
         success: true,
-        data: user.favoriteGames
+        data: games.map((game) => {
+          return {
+            _id: game?._id,
+            name: game?.name,
+            photo: game?.photo,
+            rating: game?.rating
+          };
+        })
       }) as never;
     } catch (error) {
       console.error("ERROR: ", error);
@@ -259,7 +276,14 @@ const getFavoriteGames = asyncErrorWrapper(
 
       return res.status(200).json({
         success: true,
-        data: user.favoriteGames
+        data: user.favoriteGames?.map((game) => {
+          return {
+            _id: game._id,
+            name: game.name,
+            photo: game.photo,
+            rating: game.rating
+          };
+        })
       }) as never;
     } catch (error) {
       console.error("ERROR: ", error);

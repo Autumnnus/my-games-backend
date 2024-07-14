@@ -81,6 +81,10 @@ export type UserData = {
   screenshotSize?: number;
   favoriteGames?: {
     game: mongoose.Schema.Types.ObjectId;
+    _id: mongoose.Schema.Types.ObjectId;
+    name: string;
+    rating?: number;
+    photo?: string;
     ref: "Games";
   }[];
   createdAt: Date;
