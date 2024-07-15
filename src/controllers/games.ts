@@ -4,6 +4,7 @@ import CustomError from "../helpers/errors/CustomError";
 import { findGameByIdOrError } from "../helpers/functions/findById";
 import Games from "../models/Games";
 import User from "../models/User";
+import { GamesData } from "../types/models";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -69,17 +70,35 @@ const editGame = asyncErrorWrapper(
       if (!game) {
         return next(new CustomError("Game not found", 404));
       }
-      const updatedGameFields = {
-        name,
-        photo,
-        lastPlay,
-        platform,
-        review,
-        rating,
-        status,
-        playTime,
-        firstFinished,
-        igdb
+      console.log("igdb", igdb);
+      console.log("game.igdb", game.igdb);
+      const updatedIGDB =
+        igdb && igdb.cover && Object.keys(igdb.cover).length > 0
+          ? igdb
+          : game.igdb;
+
+      const updatedGameFields: {
+        name: GamesData["name"];
+        photo: GamesData["photo"];
+        lastPlay: GamesData["lastPlay"];
+        platform: GamesData["platform"];
+        review: GamesData["review"];
+        rating: GamesData["rating"];
+        status: GamesData["status"];
+        playTime: GamesData["playTime"];
+        firstFinished: GamesData["firstFinished"];
+        igdb?: GamesData["igdb"];
+      } = {
+        name: name || game.name,
+        photo: photo || game.photo,
+        lastPlay: lastPlay || game.lastPlay,
+        platform: platform || game.platform,
+        review: review || game.review,
+        rating: rating || game.rating,
+        status: status || game.status,
+        playTime: playTime || game.playTime,
+        firstFinished: firstFinished || game.firstFinished,
+        igdb: updatedIGDB
       };
       Object.assign(game, updatedGameFields);
       game = await game.save();

@@ -83,10 +83,10 @@ const forgotPassword = asyncErrorWrapper(
     if (!user) {
       return next(new CustomError("There is no user with that e-mail.", 400));
     }
-
+    const frontUrl = process.env.FRONTEND_URL || "https://my-games.netlify.app";
     const resetPasswordToken = user.getResetPasswordTokenFromUser();
     await user.save();
-    const resetPasswordUrl = `${process.env.FRONTEND_URL}/auth/resetPassword?resetPasswordToken=${resetPasswordToken}`;
+    const resetPasswordUrl = `${frontUrl}/auth/resetPassword?resetPasswordToken=${resetPasswordToken}`;
 
     try {
       const info = await sendEmail(
