@@ -11,13 +11,8 @@ import {
   validateUserInput
 } from "../helpers/input/inputHelpers";
 import User from "../models/User";
+import { AuthenticatedRequest } from "../types/request";
 dotenv.config();
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-  };
-}
 
 const register = asyncErrorWrapper(
   async (req: Request, res: Response): Promise<void> => {

@@ -5,12 +5,7 @@ import { findGameByIdOrError } from "../helpers/functions/findById";
 import Games from "../models/Games";
 import User from "../models/User";
 import { GamesData } from "../types/models";
-
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-  };
-}
+import { AuthenticatedRequest } from "../types/request";
 
 const addNewGame = asyncErrorWrapper(
   async (
