@@ -170,66 +170,25 @@ const deleteGame = expressAsyncHandler(
   }
 );
 const getUserGames = expressAsyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { order, sortBy, search, page, limit } = req.query;
 
-    let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
-      lastPlay: -1
-    };
-    const matchCriteria: {
-      [key: string]: string | { $regex: unknown; $options: string };
-    } = { userId: id };
-
-    if (sortBy) {
-      sortCriteria = { [sortBy as string]: order === "asc" ? 1 : -1 };
-    }
-    if (search) {
-      matchCriteria.name = { $regex: search, $options: "i" };
-    }
-
     try {
-      const pageNum = page ? parseInt(page as string, 10) : 1;
-      const limitNum = limit ? parseInt(limit as string, 10) : 0;
-      const skip = (pageNum - 1) * limitNum;
-
-      const userGamesQuery = Games.find(matchCriteria).sort(sortCriteria);
-      if (limitNum > 0) {
-        userGamesQuery.skip(skip).limit(limitNum);
-      }
-
-      const userGames = await userGamesQuery;
-      return res.status(200).json({
-        success: true,
-        data: userGames
-      }) as never;
+      const userGames = await gameService.getUserGames({
+        id,
+        sortBy: sortBy as string,
+        order: order as "asc" | "desc",
+        search: search as string,
+        page: Number(page),
+        limit: Number(limit)
+      });
+      res.status(200).json(createResponse(userGames));
     } catch (error) {
-      console.error("ERROR: ", error);
-      return next(new CustomError(`Error: ${error}`, 404));
+      res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
   }
 );
-
-// const getUserGameDetail = expressAsyncHandler(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const { game_id } = req.params;
-//     try {
-//       const game = await findGameByIdOrError(game_id, next);
-
-//       if (!game) {
-//         res
-//           .status(404)
-//           .json(
-//             createResponse(null, false, `Game not found with id: ${game_id}`)
-//           );
-//       }
-
-//       res.status(200).json(createResponse(game));
-//     } catch (error) {
-//       next(createResponse(null, false, `Error: ${error}`));
-//     }
-//   }
-// );
 
 const getUserGameDetail = expressAsyncHandler(
   async (req: Request, res: Response) => {
@@ -238,7 +197,6 @@ const getUserGameDetail = expressAsyncHandler(
       const game = await gameService.getGameDetail(game_id);
       res.status(200).json(createResponse(game));
     } catch (error) {
-      console.log("#Error", error);
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
   }

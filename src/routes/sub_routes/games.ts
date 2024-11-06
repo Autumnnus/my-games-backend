@@ -7,7 +7,7 @@ import {
   getUserGameDetail,
   getUserGames,
   setFavoriteGames
-} from "../../controllers/games";
+} from "../../controllers/games.controller";
 import {
   getAccessToRoute,
   getGameOwnerAccess
@@ -30,6 +30,6 @@ router.put(
   editGame
 );
 router.post("/setFavoriteGames", getAccessToRoute, setFavoriteGames);
-router.get("/getFavoriteGames/:user_id",  getFavoriteGames);
+router.get("/getFavoriteGames/:user_id", getFavoriteGames);
 
 export default router;

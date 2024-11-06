@@ -8,7 +8,7 @@ import Screenshot from "../models/Screenshot";
 import User from "../models/User";
 import { s3Deletev2, s3Updatev2, s3Uploadv2 } from "../services/s3Service";
 import { ScreenshotData } from "../types/models";
-import { AuthenticatedRequest } from "./games";
+import { AuthenticatedRequest } from "./games.controller";
 
 interface AuthenticatedFileRequest extends Request {
   user?: {

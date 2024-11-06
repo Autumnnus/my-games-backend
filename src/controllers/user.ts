@@ -6,7 +6,7 @@ import Games from "../models/Games";
 import Screenshot from "../models/Screenshot";
 import User from "../models/User";
 import { s3Deletev2 } from "../services/s3Service";
-import { AuthenticatedRequest } from "./games";
+import { AuthenticatedRequest } from "./games.controller";
 
 const getSingleUser = asyncErrorWrapper(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
