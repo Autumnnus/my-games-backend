@@ -1,4 +1,5 @@
 import { NextFunction } from "express";
+import { createResponse } from "../../middlewares/error/CreateResponse";
 import Games from "../../models/Games";
 import Screenshot from "../../models/Screenshot";
 import User from "../../models/User";
@@ -12,12 +13,19 @@ async function findUserByIdOrError(id: string, next: NextFunction) {
   return user;
 }
 async function findGameByIdOrError(id: string, next: NextFunction) {
-  const game = await Games.findById(id);
-  if (!game) {
-    return next(new CustomError("Game not found", 404));
+  try {
+    const game = await Games.findById(id);
+    if (!game) {
+      return next(createResponse(null, false, `Game not found`));
+    }
+
+    return game;
+  } catch (error) {
+    console.log("error", error);
+    return next(createResponse(null, false, `Error: ${error}`));
   }
-  return game;
 }
+
 async function findScreenshotByIdOrError(id: string, next: NextFunction) {
   const screenshot = await Screenshot.findById(id);
   if (!screenshot) {

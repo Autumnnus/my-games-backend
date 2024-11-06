@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import asyncErrorWrapper from "express-async-handler";
+import { default as expressAsyncHandler } from "express-async-handler";
 import CustomError from "../helpers/errors/CustomError";
-import { findGameByIdOrError } from "../helpers/functions/findById";
+import { createResponse } from "../middlewares/error/CreateResponse";
 import Games from "../models/Games";
 import User from "../models/User";
+import gameService from "../services/game.service";
 import { GamesData } from "../types/models";
 
 export interface AuthenticatedRequest extends Request {
@@ -12,7 +13,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-const addNewGame = asyncErrorWrapper(
+const addNewGame = expressAsyncHandler(
   async (
     req: AuthenticatedRequest,
     res: Response,
@@ -46,7 +47,7 @@ const addNewGame = asyncErrorWrapper(
   }
 );
 
-const editGame = asyncErrorWrapper(
+const editGame = expressAsyncHandler(
   async (
     req: AuthenticatedRequest,
     res: Response,
@@ -133,7 +134,7 @@ const editGame = asyncErrorWrapper(
   }
 );
 
-const deleteGame = asyncErrorWrapper(
+const deleteGame = expressAsyncHandler(
   async (
     req: AuthenticatedRequest,
     res: Response,
@@ -168,7 +169,7 @@ const deleteGame = asyncErrorWrapper(
     }
   }
 );
-const getUserGames = asyncErrorWrapper(
+const getUserGames = expressAsyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { id } = req.params;
     const { order, sortBy, search, page, limit } = req.query;
@@ -209,28 +210,41 @@ const getUserGames = asyncErrorWrapper(
   }
 );
 
-const getUserGameDetail = asyncErrorWrapper(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { game_id } = req.params;
+// const getUserGameDetail = expressAsyncHandler(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const { game_id } = req.params;
+//     try {
+//       const game = await findGameByIdOrError(game_id, next);
+
+//       if (!game) {
+//         res
+//           .status(404)
+//           .json(
+//             createResponse(null, false, `Game not found with id: ${game_id}`)
+//           );
+//       }
+
+//       res.status(200).json(createResponse(game));
+//     } catch (error) {
+//       next(createResponse(null, false, `Error: ${error}`));
+//     }
+//   }
+// );
+
+const getUserGameDetail = expressAsyncHandler(
+  async (req: Request, res: Response) => {
     try {
-      const game = await findGameByIdOrError(game_id, next);
-
-      if (!game) {
-        return next(new CustomError(`Game not found with id: ${game_id}`, 404));
-      }
-
-      return res.status(200).json({
-        success: true,
-        data: game
-      }) as never;
+      const { game_id } = req.params;
+      const game = await gameService.getGameDetail(game_id);
+      res.status(200).json(createResponse(game));
     } catch (error) {
-      console.error("ERROR: ", error);
-      return next(new CustomError(`Error: ${error}`, 500));
+      console.log("#Error", error);
+      res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
   }
 );
 
-const setFavoriteGames = asyncErrorWrapper(
+const setFavoriteGames = expressAsyncHandler(
   async (
     req: AuthenticatedRequest,
     res: Response,
@@ -280,7 +294,7 @@ const setFavoriteGames = asyncErrorWrapper(
   }
 );
 
-const getFavoriteGames = asyncErrorWrapper(
+const getFavoriteGames = expressAsyncHandler(
   async (
     req: AuthenticatedRequest,
     res: Response,
