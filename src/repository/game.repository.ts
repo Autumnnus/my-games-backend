@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Games from "../models/Games";
 
 type MatchCriteria = {
@@ -10,6 +11,21 @@ type SortCriteria = {
 
 async function getGameById(id: string) {
   return await Games.findById(id);
+}
+
+async function getUserGameById(userId: string) {
+  return await Games.find({ userId });
+}
+
+async function createGame(data: any, userId: string) {
+  return await Games.create({
+    ...data,
+    userId
+  });
+}
+
+async function findGameByIdAndDelete(id: string) {
+  return await Games.findByIdAndDelete(id);
 }
 
 async function getGames(
@@ -28,5 +44,8 @@ async function getGames(
 
 export default {
   getGameById,
-  getGames
+  getUserGameById,
+  getGames,
+  createGame,
+  findGameByIdAndDelete
 };
