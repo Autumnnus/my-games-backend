@@ -8,7 +8,7 @@ import {
   resetPassword,
   validateEmail,
   verifyAccount
-} from "../../controllers/auth";
+} from "../../controllers/auth.controller";
 import { getAccessToRoute } from "../../middlewares/authorization/auth";
 
 const router = express.Router();

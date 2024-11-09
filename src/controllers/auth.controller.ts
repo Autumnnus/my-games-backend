@@ -6,11 +6,10 @@ import nodemailer from "nodemailer";
 import { generateAccessToken } from "../helpers/auth/jwt-helper";
 import CustomError from "../helpers/errors/CustomError";
 import sendEmail from "../helpers/functions/sendMail";
-import {
-  comparePassword,
-  validateUserInput
-} from "../helpers/input/inputHelpers";
+import { comparePassword } from "../helpers/input/inputHelpers";
+import { createResponse } from "../middlewares/error/CreateResponse";
 import User from "../models/User";
+import authService from "../services/auth.service";
 dotenv.config();
 
 interface AuthenticatedRequest extends Request {
@@ -19,44 +18,34 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-const register = asyncErrorWrapper(
-  async (req: Request, res: Response): Promise<void> => {
+const registerController = asyncErrorWrapper(
+  async (req: Request, res: Response) => {
     const { email, name, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "This user already exists" }) as never;
+    try {
+      const newUser = await authService.registerService(email, name, password);
+      // res.status(200).json(createResponse(game));
+      generateAccessToken(newUser, res);
+    } catch (error) {
+      res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
-    if (!validateUserInput(email, password)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please check your inputs" }) as never;
-    }
-    const newUser = await User.create({ email, name, password });
-    generateAccessToken(newUser, res);
   }
 );
 
-const login = asyncErrorWrapper(
-  async (req: Request, res: Response, next: NextFunction) => {
+const loginController = asyncErrorWrapper(
+  async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    if (!validateUserInput(email, password)) {
-      return next(new CustomError("Please check your inputs", 400));
+    try {
+      const user = await authService.loginService(email, password);
+      // res.status(200).json(createResponse(game));
+      generateAccessToken(user, res);
+    } catch (error) {
+      res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
-    const user = await User.findOne({ email }).select("+password");
-    if (!comparePassword(password, user?.password || "")) {
-      return next(new CustomError("Please check your password", 400));
-    }
-    if (!user) {
-      return next(new CustomError("User not found", 404));
-    }
-    generateAccessToken(user, res);
   }
 );
 
-const logout = asyncErrorWrapper(
-  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+const logoutController = asyncErrorWrapper(
+  async (_req: Request, res: Response, next: NextFunction) => {
     try {
       return res
         .status(200)
@@ -76,39 +65,20 @@ const logout = asyncErrorWrapper(
   }
 );
 
-const forgotPassword = asyncErrorWrapper(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const forgotPasswordController = asyncErrorWrapper(
+  async (req: Request, res: Response) => {
     const email = req.body.email;
-    const user = await User.findOne({ email });
-    if (!user) {
-      return next(new CustomError("There is no user with that e-mail.", 400));
-    }
-    const frontUrl = process.env.FRONTEND_URL || "https://my-games.netlify.app";
-    const resetPasswordToken = user.getResetPasswordTokenFromUser();
-    await user.save();
-    const resetPasswordUrl = `${frontUrl}/auth/resetPassword?resetPasswordToken=${resetPasswordToken}`;
-
     try {
-      const info = await sendEmail(
-        user,
-        "Reset Password",
-        "We received a request to reset the password for your account. If you did not request this change, please ignore this email. No changes will be made to your account.",
-        resetPasswordUrl
-      );
-
-      return res.status(200).json({
-        msg: "Email Sent",
-        info: info,
-        preview: nodemailer.getTestMessageUrl(info)
-      }) as never;
-    } catch (err) {
-      return next(err);
+      const data = await authService.forgotPasswordService(email);
+      res.status(200).json(createResponse(data));
+    } catch (error) {
+      res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
   }
 );
 
 const resetPassword = asyncErrorWrapper(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { resetPasswordToken } = req.query;
     const { password } = req.body;
     try {
@@ -138,11 +108,7 @@ const resetPassword = asyncErrorWrapper(
 );
 
 const editUser = asyncErrorWrapper(
-  async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const editInformation = req.body;
     try {
       // const user = await findUserByIdOrError(req.user?.id ||"", next);
@@ -219,7 +185,7 @@ const editUser = asyncErrorWrapper(
 );
 
 const validateEmail = asyncErrorWrapper(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const resetEmail = req.body.email;
     const user = await User.findOne({ email: resetEmail });
     if (!user) {
@@ -253,7 +219,7 @@ const validateEmail = asyncErrorWrapper(
 );
 
 const verifyAccount = asyncErrorWrapper(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { verificationToken } = req.query;
     try {
       if (!verificationToken) {
@@ -283,10 +249,10 @@ const verifyAccount = asyncErrorWrapper(
 
 export {
   editUser,
-  forgotPassword,
-  login,
-  logout,
-  register,
+  forgotPasswordController as forgotPassword,
+  loginController as login,
+  logoutController as logout,
+  registerController as register,
   resetPassword,
   validateEmail,
   verifyAccount
