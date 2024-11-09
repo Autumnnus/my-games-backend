@@ -10,7 +10,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 const addNewGame = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const game = await gameService.addNewGame(req.body, req.user?.id || "");
       res.status(200).json(createResponse(game));
@@ -21,7 +21,7 @@ const addNewGame = expressAsyncHandler(
 );
 
 const editGame = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     try {
       const game = await gameService.editGame(req.body, id, req.user?.id || "");
@@ -33,7 +33,7 @@ const editGame = expressAsyncHandler(
 );
 
 const deleteGame = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     try {
       const game = await gameService.deleteGame(id, req.user?.id || "");
@@ -44,7 +44,7 @@ const deleteGame = expressAsyncHandler(
   }
 );
 const getUserGames = expressAsyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: Request, res: Response) => {
     const { id } = req.params;
     const { order, sortBy, search, page, limit } = req.query;
 
@@ -77,7 +77,7 @@ const getUserGameDetail = expressAsyncHandler(
 );
 
 const setFavoriteGames = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const { first_game, second_game, third_game } = req.body;
 
     try {
@@ -94,10 +94,11 @@ const setFavoriteGames = expressAsyncHandler(
 );
 
 const getFavoriteGames = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { user_id } = req.params;
     try {
-      const { user_id } = req.params;
       const game = await gameService.getFavoriteGames(user_id || "");
+      console.log("game", game);
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));

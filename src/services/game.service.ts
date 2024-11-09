@@ -151,14 +151,12 @@ async function setFavoriteGames(userId: string, gameIds: any[]) {
 
   user.favoriteGames = gameIds;
   await user.save();
-  games.map((game) => {
-    return {
-      _id: game?._id,
-      name: game?.name,
-      photo: game?.photo,
-      rating: game?.rating
-    };
-  });
+  return games.map((game) => ({
+    _id: game?._id,
+    name: game?.name,
+    photo: game?.photo,
+    rating: game?.rating
+  }));
 }
 
 async function getFavoriteGames(userId: string) {
@@ -167,14 +165,12 @@ async function getFavoriteGames(userId: string) {
     throw new Error("User not found");
   }
 
-  user.favoriteGames?.map((game) => {
-    return {
-      _id: game._id,
-      name: game.name,
-      photo: game.photo,
-      rating: game.rating
-    };
-  });
+  return user.favoriteGames?.map((game) => ({
+    _id: game._id,
+    name: game.name,
+    photo: game.photo,
+    rating: game.rating
+  }));
 }
 
 async function getUserGames({
