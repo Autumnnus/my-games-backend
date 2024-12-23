@@ -98,7 +98,6 @@ const getFavoriteGames = expressAsyncHandler(
     const { user_id } = req.params;
     try {
       const game = await gameService.getFavoriteGames(user_id || "");
-      console.log("game", game);
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));

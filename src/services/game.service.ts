@@ -31,7 +31,7 @@ async function addNewGame(data: any, userId: string) {
   const game = await gameRepository.createGame(data, userId);
   const user = await userRepository.getUserById(userId);
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("Game not found");
   }
   const userGames = await gameRepository.getUserGameById(userId);
   if (data.status === "completed") {
@@ -181,7 +181,6 @@ async function getUserGames({
   page,
   limit
 }: GetUserGamesParams) {
-  console.log(id, sortBy, order, search, page, limit);
   let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
     lastPlay: -1
   };
