@@ -1,5 +1,9 @@
 import express from "express";
-import { deleteUser, getAllUsers, getSingleUser } from "../../controllers/user";
+import {
+  deleteUserController,
+  getAllUsersController,
+  getSingleUserController
+} from "../../controllers/user.controller";
 import { getAccessToRoute } from "../../middlewares/authorization/auth";
 import {
   checkIsAdmin,
@@ -8,12 +12,12 @@ import {
 
 const router = express.Router();
 
-router.get("/", getAllUsers);
-router.get("/:id", checkUserExist, getSingleUser);
+router.get("/", getAllUsersController);
+router.get("/:id", checkUserExist, getSingleUserController);
 router.delete(
   "/deleteUser/:id",
   [getAccessToRoute, checkUserExist, checkIsAdmin],
-  deleteUser
+  deleteUserController
 );
 
 export default router;

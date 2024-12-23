@@ -1,11 +1,11 @@
 import express, { RequestHandler } from "express";
 import {
-  addScreenShot,
-  deleteScreenshot,
-  editScreenshot,
-  getRandomScreenshots,
-  getScreenshot
-} from "../../controllers/screenshot";
+  addScreenshotController,
+  deleteScreenshotController,
+  editScreenshotController,
+  getRandomScreenshotsController,
+  getScreenshotController
+} from "../../controllers/screenshot.controller";
 import upload from "../../helpers/functions/multer";
 import {
   getAccessToRoute,
@@ -19,24 +19,24 @@ import {
 
 const router = express.Router();
 
-router.get("/:game_id", getScreenshot);
-router.get("/get/random/:count", getRandomScreenshots);
+router.get("/:game_id", getScreenshotController);
+router.get("/get/random/:count", getRandomScreenshotsController);
 router.post(
   "/add/:game_id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
   upload.array("file", 50),
-  addScreenShot as RequestHandler
+  addScreenshotController as RequestHandler
 );
 router.delete(
   "/delete/:game_id/:screenshot_id",
   [getAccessToRoute, checkGameSSExist, getGameSSOwnerAccess],
-  deleteScreenshot
+  deleteScreenshotController
 );
 router.put(
   "/edit/:game_id/:screenshot_id",
   [getAccessToRoute, checkGameSSExist, getGameSSOwnerAccess],
   upload.single("file"),
-  editScreenshot
+  editScreenshotController
 );
 
 export default router;
