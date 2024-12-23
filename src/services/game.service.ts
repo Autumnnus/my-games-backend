@@ -27,7 +27,7 @@ type GameFields = {
   igdb?: GamesData["igdb"];
 };
 
-async function addNewGame(data: any, userId: string) {
+async function addNewGameService(data: any, userId: string) {
   const game = await gameRepository.createGame(data, userId);
   const user = await userRepository.getUserById(userId);
   if (!user) {
@@ -43,7 +43,7 @@ async function addNewGame(data: any, userId: string) {
   return game;
 }
 
-async function editGame(data: any, gameId: string, userId: string) {
+async function editGameService(data: any, gameId: string, userId: string) {
   const {
     name,
     photo,
@@ -97,7 +97,7 @@ async function editGame(data: any, gameId: string, userId: string) {
   return game;
 }
 
-async function deleteGame(gameId: string, userId: string) {
+async function deleteGameService(gameId: string, userId: string) {
   const game = await gameRepository.getGameById(gameId);
   if (!game) {
     throw new Error("Game not found");
@@ -118,7 +118,7 @@ async function deleteGame(gameId: string, userId: string) {
   return true;
 }
 
-async function getGameDetail(gameId: string) {
+async function getGameDetailService(gameId: string) {
   const game = await gameRepository.getGameById(gameId);
   if (!game) {
     throw new Error("Game not found");
@@ -126,7 +126,7 @@ async function getGameDetail(gameId: string) {
   return game;
 }
 
-async function setFavoriteGames(userId: string, gameIds: any[]) {
+async function setFavoriteGamesService(userId: string, gameIds: any[]) {
   const user = await userRepository.getUserById(userId);
   if (!user) {
     throw new Error("User not found");
@@ -159,7 +159,7 @@ async function setFavoriteGames(userId: string, gameIds: any[]) {
   }));
 }
 
-async function getFavoriteGames(userId: string) {
+async function getFavoriteGamesService(userId: string) {
   const user = await User.findById(userId).populate("favoriteGames");
   if (!user) {
     throw new Error("User not found");
@@ -173,7 +173,7 @@ async function getFavoriteGames(userId: string) {
   }));
 }
 
-async function getUserGames({
+async function getUserGamesService({
   id,
   sortBy,
   order,
@@ -209,11 +209,11 @@ async function getUserGames({
 }
 
 export default {
-  addNewGame,
-  deleteGame,
-  getGameDetail,
-  getUserGames,
-  editGame,
-  setFavoriteGames,
-  getFavoriteGames
+  addNewGameService,
+  deleteGameService,
+  getGameDetailService,
+  getUserGamesService,
+  editGameService,
+  setFavoriteGamesService,
+  getFavoriteGamesService
 };

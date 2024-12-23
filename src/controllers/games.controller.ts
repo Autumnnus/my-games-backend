@@ -9,10 +9,13 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-const addNewGame = expressAsyncHandler(
+const addNewGameController = expressAsyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const game = await gameService.addNewGame(req.body, req.user?.id || "");
+      const game = await gameService.addNewGameService(
+        req.body,
+        req.user?.id || ""
+      );
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
@@ -20,11 +23,15 @@ const addNewGame = expressAsyncHandler(
   }
 );
 
-const editGame = expressAsyncHandler(
+const editGameController = expressAsyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     try {
-      const game = await gameService.editGame(req.body, id, req.user?.id || "");
+      const game = await gameService.editGameService(
+        req.body,
+        id,
+        req.user?.id || ""
+      );
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
@@ -32,24 +39,24 @@ const editGame = expressAsyncHandler(
   }
 );
 
-const deleteGame = expressAsyncHandler(
+const deleteGameController = expressAsyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     try {
-      const game = await gameService.deleteGame(id, req.user?.id || "");
+      const game = await gameService.deleteGameService(id, req.user?.id || "");
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
     }
   }
 );
-const getUserGames = expressAsyncHandler(
+const getUserGamesController = expressAsyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const { order, sortBy, search, page, limit } = req.query;
 
     try {
-      const userGames = await gameService.getUserGames({
+      const userGames = await gameService.getUserGamesService({
         id,
         sortBy: sortBy as string,
         order: order as "asc" | "desc",
@@ -64,11 +71,11 @@ const getUserGames = expressAsyncHandler(
   }
 );
 
-const getUserGameDetail = expressAsyncHandler(
+const getUserGameDetailController = expressAsyncHandler(
   async (req: Request, res: Response) => {
     try {
       const { game_id } = req.params;
-      const game = await gameService.getGameDetail(game_id);
+      const game = await gameService.getGameDetailService(game_id);
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
@@ -76,16 +83,15 @@ const getUserGameDetail = expressAsyncHandler(
   }
 );
 
-const setFavoriteGames = expressAsyncHandler(
+const setFavoriteGamesController = expressAsyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { first_game, second_game, third_game } = req.body;
 
     try {
-      const game = await gameService.setFavoriteGames(req.user?.id || "", [
-        first_game,
-        second_game,
-        third_game
-      ]);
+      const game = await gameService.setFavoriteGamesService(
+        req.user?.id || "",
+        [first_game, second_game, third_game]
+      );
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
@@ -93,11 +99,11 @@ const setFavoriteGames = expressAsyncHandler(
   }
 );
 
-const getFavoriteGames = expressAsyncHandler(
+const getFavoriteGamesController = expressAsyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { user_id } = req.params;
     try {
-      const game = await gameService.getFavoriteGames(user_id || "");
+      const game = await gameService.getFavoriteGamesService(user_id || "");
       res.status(200).json(createResponse(game));
     } catch (error) {
       res.status(404).json(createResponse(null, false, `Error: ${error}`));
@@ -106,11 +112,11 @@ const getFavoriteGames = expressAsyncHandler(
 );
 
 export {
-  addNewGame,
-  deleteGame,
-  editGame,
-  getFavoriteGames,
-  getUserGameDetail,
-  getUserGames,
-  setFavoriteGames
+  addNewGameController,
+  deleteGameController,
+  editGameController,
+  getFavoriteGamesController,
+  getUserGameDetailController,
+  getUserGamesController,
+  setFavoriteGamesController
 };

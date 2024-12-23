@@ -1,12 +1,12 @@
 import express from "express";
 import {
-  addNewGame,
-  deleteGame,
-  editGame,
-  getFavoriteGames,
-  getUserGameDetail,
-  getUserGames,
-  setFavoriteGames
+  addNewGameController,
+  deleteGameController,
+  editGameController,
+  getFavoriteGamesController,
+  getUserGameDetailController,
+  getUserGamesController,
+  setFavoriteGamesController
 } from "../../controllers/games.controller";
 import {
   getAccessToRoute,
@@ -16,20 +16,20 @@ import { checkGameExist } from "../../middlewares/database/databaseErrorHelpers"
 
 const router = express.Router();
 
-router.post("/add", getAccessToRoute, addNewGame);
-router.get("/user/:id", getUserGames);
-router.get("/game/:game_id", getUserGameDetail);
+router.post("/add", getAccessToRoute, addNewGameController);
+router.get("/user/:id", getUserGamesController);
+router.get("/game/:game_id", getUserGameDetailController);
 router.delete(
   "/delete/:id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
-  deleteGame
+  deleteGameController
 );
 router.put(
   "/edit/:id",
   [getAccessToRoute, checkGameExist, getGameOwnerAccess],
-  editGame
+  editGameController
 );
-router.post("/setFavoriteGames", getAccessToRoute, setFavoriteGames);
-router.get("/getFavoriteGames/:user_id", getFavoriteGames);
+router.post("/setFavoriteGames", getAccessToRoute, setFavoriteGamesController);
+router.get("/getFavoriteGames/:user_id", getFavoriteGamesController);
 
 export default router;
