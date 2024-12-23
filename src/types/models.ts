@@ -24,45 +24,47 @@ export type GamesData = {
   screenshotSize?: number;
   userId: mongoose.Schema.Types.ObjectId;
   firstFinished?: Date;
-  igdb?: {
-    id: number;
-    cover: {
-      id: number;
-      url: string;
-      game: number;
-    };
-    aggregated_rating?: number;
-    aggregated_rating_count?: number;
-    game_modes?: {
-      id: number;
-      name: string;
-    }[];
-    genres?: {
-      id: number;
-      name: string;
-    }[];
-    developers?: {
-      id: number;
-      name: string;
-    }[];
-    publishers?: {
-      id: number;
-      name: string;
-    }[];
-    player_perspectives?: {
-      id: number;
-      name: string;
-    }[];
-    release_date?: {
-      id: number;
-      date: number;
-    };
-    themes?: {
-      id: number;
-      name: string;
-    }[];
-  };
+  igdb?: IgdbData;
   slug?: string;
+};
+
+type IgdbData = {
+  id: number;
+  cover: {
+    id: number;
+    url: string;
+    game: number;
+  };
+  aggregated_rating?: number;
+  aggregated_rating_count?: number;
+  game_modes?: {
+    id: number;
+    name: string;
+  }[];
+  genres?: {
+    id: number;
+    name: string;
+  }[];
+  developers?: {
+    id: number;
+    name: string;
+  }[];
+  publishers?: {
+    id: number;
+    name: string;
+  }[];
+  player_perspectives?: {
+    id: number;
+    name: string;
+  }[];
+  release_date?: {
+    id: number;
+    date: number;
+  };
+  themes?: {
+    id: number;
+    name: string;
+  }[];
 };
 
 export type UserData = {
