@@ -1,7 +1,6 @@
 type StatisticData = {
   _id: string;
-  name: string;
-  count: number;
+  value: number;
 };
 
 export type StatisticsResponse = {
@@ -16,4 +15,5 @@ export type StatisticsResponse = {
   themeStats: StatisticData[];
   releaseYearStats: StatisticData[];
   playerPerspectiveStats: StatisticData[];
+  playTimeByReleaseDate: StatisticData[];
 };

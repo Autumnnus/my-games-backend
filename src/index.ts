@@ -22,6 +22,7 @@ app.use((err: Error, req: express.Request, res: express.Response): void => {
     .status(500)
     .json(createResponse(null, false, `Error: ${err.message || err}`));
 });
+
 // app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(color.bgCyan(`Server is running on port ${PORT}...`));

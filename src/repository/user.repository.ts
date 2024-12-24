@@ -8,7 +8,12 @@ async function getUserByEmail(email: string) {
   return await User.findOne({ email });
 }
 
+async function findAllUsers() {
+  return await User.find({});
+}
+
 export default {
   getUserById,
-  getUserByEmail
+  getUserByEmail,
+  findAllUsers
 };

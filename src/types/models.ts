@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { StatisticsResponse } from "./statistics";
 
 export type GamesData = {
   name: string;
@@ -28,8 +29,9 @@ export type GamesData = {
   slug?: string;
 };
 
-type IgdbData = {
+export type IgdbData = {
   id: number;
+  category: number;
   cover: {
     id: number;
     url: string;
@@ -37,6 +39,11 @@ type IgdbData = {
   };
   aggregated_rating?: number;
   aggregated_rating_count?: number;
+  first_release_date?: number;
+  release_dates?: {
+    id: number;
+    date: number;
+  }[];
   game_modes?: {
     id: number;
     name: string;
@@ -57,10 +64,6 @@ type IgdbData = {
     id: number;
     name: string;
   }[];
-  release_date?: {
-    id: number;
-    date: number;
-  };
   themes?: {
     id: number;
     name: string;
@@ -95,6 +98,7 @@ export type UserData = {
   generateJwtFromUser(): string;
   getVerificationTokenFromUser(): string;
 };
+
 export type ScreenshotData = {
   name?: string;
   url: string;
@@ -103,6 +107,13 @@ export type ScreenshotData = {
   user: mongoose.Schema.Types.ObjectId;
   game: mongoose.Schema.Types.ObjectId;
   type: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type StatisticsData = {
+  statistics: StatisticsResponse;
+  user: mongoose.Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 };

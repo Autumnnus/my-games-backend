@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import mongoose from "mongoose";
 import Games from "../models/Games";
 import { StatisticsResponse } from "../types/statistics";
 
@@ -43,69 +44,140 @@ async function getGames(
   return await query;
 }
 
-async function getGameStatistics(): Promise<StatisticsResponse> {
+async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
+  const matchStage = userId
+    ? { $match: { userId: new mongoose.Types.ObjectId(userId) } }
+    : { $match: {} };
+
   const playTimeStats = await Games.aggregate([
+    matchStage,
     { $group: { _id: "$platform", totalPlayTime: { $sum: "$playTime" } } },
     { $sort: { totalPlayTime: -1 } }
   ]);
 
   const platformStats = await Games.aggregate([
-    { $group: { _id: "$platform", count: { $sum: 1 } } },
+    matchStage,
+    { $group: { _id: "$platform", value: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
   const statusStats = await Games.aggregate([
-    { $group: { _id: "$status", count: { $sum: 1 } } },
+    matchStage,
+    { $group: { _id: "$status", value: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
   const genreStats = await Games.aggregate([
+    matchStage,
     { $unwind: "$igdb.genres" },
-    { $group: { _id: "$igdb.genres.name", count: { $sum: 1 } } },
+    { $group: { _id: "$igdb.genres.name", value: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
   const developerStats = await Games.aggregate([
-    { $unwind: "$igdb.developers" },
-    { $group: { _id: "$igdb.developers.name", count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+    matchStage,
+    { $unwind: "$igdb.involved_companies" },
+    {
+      $match: {
+        "igdb.involved_companies.developer": true
+      }
+    },
+    {
+      $group: {
+        _id: "$igdb.involved_companies.company.name",
+        value: { $sum: 1 }
+      }
+    },
+    { $sort: { value: -1 } }
   ]);
+
   const publisherStats = await Games.aggregate([
-    { $unwind: "$igdb.publishers" },
-    { $group: { _id: "$igdb.publishers.name", count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+    matchStage,
+    { $unwind: "$igdb.involved_companies" },
+    {
+      $match: {
+        "igdb.involved_companies.publisher": true
+      }
+    },
+    {
+      $group: {
+        _id: "$igdb.involved_companies.company.name",
+        value: { $sum: 1 }
+      }
+    },
+    { $sort: { value: -1 } }
   ]);
+
   const gameModeStats = await Games.aggregate([
+    matchStage,
     { $unwind: "$igdb.game_modes" },
-    { $group: { _id: "$igdb.game_modes.name", count: { $sum: 1 } } },
+    { $group: { _id: "$igdb.game_modes.name", value: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
   const ratingStats = await Games.aggregate([
+    matchStage,
     { $match: { "igdb.aggregated_rating": { $exists: true } } },
     {
       $bucket: {
         groupBy: "$igdb.aggregated_rating",
         boundaries: [0, 50, 75, 90, 100],
         default: "Others",
-        output: { count: { $sum: 1 } }
+        output: { value: { $sum: 1 } }
       }
     }
   ]);
   const themeStats = await Games.aggregate([
+    matchStage,
     { $unwind: "$igdb.themes" },
-    { $group: { _id: "$igdb.themes.name", count: { $sum: 1 } } },
+    { $group: { _id: "$igdb.themes.name", value: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
   const releaseYearStats = await Games.aggregate([
-    { $match: { "igdb.release_date.date": { $exists: true } } },
+    matchStage,
+    {
+      $match: {
+        "igdb.first_release_date": { $exists: true }
+      }
+    },
+    {
+      $addFields: {
+        firstReleaseDate: {
+          $toDate: { $multiply: ["$igdb.first_release_date", 1000] }
+        }
+      }
+    },
     {
       $group: {
-        _id: { $year: { $toDate: "$igdb.release_date.date" } },
-        count: { $sum: 1 }
+        _id: { $year: "$firstReleaseDate" },
+        value: { $sum: 1 }
       }
     },
     { $sort: { _id: 1 } }
   ]);
+  const playTimeByReleaseDate = await Games.aggregate([
+    matchStage,
+    {
+      $match: {
+        "igdb.first_release_date": { $exists: true }
+      }
+    },
+    {
+      $addFields: {
+        releaseDate: {
+          $toDate: { $multiply: ["$igdb.first_release_date", 1000] }
+        }
+      }
+    },
+    {
+      $group: {
+        _id: { $year: "$releaseDate" },
+        totalPlayTime: { $sum: "$playTime" }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ]);
+
   const playerPerspectiveStats = await Games.aggregate([
+    matchStage,
     { $unwind: "$igdb.player_perspectives" },
-    { $group: { _id: "$igdb.player_perspectives.name", count: { $sum: 1 } } },
+    { $group: { _id: "$igdb.player_perspectives.name", value: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
 
@@ -120,7 +192,8 @@ async function getGameStatistics(): Promise<StatisticsResponse> {
     ratingStats,
     themeStats,
     releaseYearStats,
-    playerPerspectiveStats
+    playerPerspectiveStats,
+    playTimeByReleaseDate
   };
 }
 

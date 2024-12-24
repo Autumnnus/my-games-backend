@@ -1,13 +1,15 @@
 import express from "express";
 import {
   getStatisticsController,
-  getUserStatisticsController
+  getUserStatisticsController,
+  updateStatisticsController
 } from "../../controllers/statistics.controller";
-import { checkUserExist } from "../../middlewares/database/databaseErrorHelpers";
+import { getAccessToRoute } from "../../middlewares/authorization/auth";
 
 const router = express.Router();
 
 router.get("/", getStatisticsController);
-router.get("/:id", checkUserExist, getUserStatisticsController);
+router.get("/:id", getUserStatisticsController);
+router.put("/", getAccessToRoute, updateStatisticsController);
 
 export default router;
