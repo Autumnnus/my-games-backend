@@ -5,7 +5,7 @@ import statisticsService from "../services/statistics.service";
 import { AuthenticatedRequest } from "../types/request";
 
 const getStatisticsController = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
+  async (_: AuthenticatedRequest, res: Response) => {
     try {
       const data = await statisticsService.getStatisticsService();
       res.status(200).json(createResponse(data));
@@ -28,8 +28,14 @@ const getUserStatisticsController = expressAsyncHandler(
 );
 
 const updateStatisticsController = expressAsyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    console.log(2222);
+  async (_: AuthenticatedRequest, res: Response) => {
+    if (process.env.NODE_ENV !== "development") {
+      res
+        .status(404)
+        .json(
+          createResponse("This action is only allowed in development mode")
+        );
+    }
     try {
       const data = await statisticsService.updateStatisticsService();
       res.status(200).json(createResponse(data));
