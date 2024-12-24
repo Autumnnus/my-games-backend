@@ -1,27 +1,18 @@
 type StatisticData = {
   _id: string;
-  value: number;
+  playTime: number;
+  count: number;
 };
 
 export type StatisticsResponse = {
-  platformPlayTimeStats: StatisticData[];
-  platformCountStats: StatisticData[];
-  statusPlayTimeStats: StatisticData[];
-  statusCountStats: StatisticData[];
-  genrePlayTimeStats: StatisticData[];
-  genreCountStats: StatisticData[];
-  developerPlayTimeStats: StatisticData[];
-  developerCountStats: StatisticData[];
-  publisherPlayTimeStats: StatisticData[];
-  publisherCountStats: StatisticData[];
-  gameModePlayTimeStats: StatisticData[];
-  gameModeCountStats: StatisticData[];
-  ratingPlayTimeStats: StatisticData[];
-  ratingCountStats: StatisticData[];
-  themePlayTimeStats: StatisticData[];
-  themeCountStats: StatisticData[];
-  releaseYearPlayTimeStats: StatisticData[];
-  releaseYearCountStats: StatisticData[];
-  playerPerspectivePlayTimeStats: StatisticData[];
-  playerPerspectiveCountStats: StatisticData[];
+  platformStats: StatisticData[];
+  statusStats: StatisticData[];
+  genreStats: StatisticData[];
+  developerStats: StatisticData[];
+  publisherStats: StatisticData[];
+  gameModeStats: StatisticData[];
+  ratingStats: StatisticData[];
+  themeStats: StatisticData[];
+  releaseYearStats: StatisticData[];
+  playerPerspectiveStats: StatisticData[];
 };
