@@ -68,6 +68,8 @@ const GamesSchema = new Schema<Document & slugData & GamesData>(
       },
       aggregated_rating: Number,
       aggregated_rating_count: Number,
+      first_release_date: Number,
+      category: Number,
       game_modes: [
         {
           id: Number,
@@ -80,16 +82,15 @@ const GamesSchema = new Schema<Document & slugData & GamesData>(
           name: String
         }
       ],
-      developers: [
+      involved_companies: [
         {
           id: Number,
-          name: String
-        }
-      ],
-      publishers: [
-        {
-          id: Number,
-          name: String
+          company: {
+            id: Number,
+            name: String
+          },
+          developer: Boolean,
+          publisher: Boolean
         }
       ],
       player_perspectives: [
@@ -98,10 +99,12 @@ const GamesSchema = new Schema<Document & slugData & GamesData>(
           name: String
         }
       ],
-      release_date: {
-        id: Number,
-        date: Number
-      },
+      release_dates: [
+        {
+          id: Number,
+          date: Number
+        }
+      ],
       themes: [
         {
           id: Number,

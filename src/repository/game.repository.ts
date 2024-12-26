@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import mongoose from "mongoose";
 import Games from "../models/Games";
+import { StatisticsResponse } from "../types/statistics";
 
 type MatchCriteria = {
   [key: string]: string | { $regex: unknown; $options: string };
@@ -42,10 +44,200 @@ async function getGames(
   return await query;
 }
 
+async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
+  const matchStage = userId
+    ? { $match: { userId: new mongoose.Types.ObjectId(userId) } }
+    : { $match: {} };
+
+  const results = await Games.aggregate([
+    matchStage,
+    {
+      $facet: {
+        platformStats: [
+          {
+            $group: {
+              _id: "$platform",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        statusStats: [
+          {
+            $group: {
+              _id: "$status",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        myGamesRatingStats: [
+          {
+            $bucketAuto: {
+              groupBy: "$rating",
+              buckets: 10,
+              output: {
+                playTime: { $sum: "$playTime" },
+                count: { $sum: 1 },
+                averageRating: { $avg: "$rating" }
+              }
+            }
+          },
+          {
+            $project: {
+              _id: {
+                $concat: ["$id.min", " ", "$id.max"]
+              },
+              playTime: 1,
+              count: 1,
+              averageRating: 1
+            }
+          },
+          { $sort: { averageRating: 1 } }
+        ],
+        genreStats: [
+          { $unwind: "$igdb.genres" },
+          {
+            $group: {
+              _id: "$igdb.genres.name",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        developerStats: [
+          { $unwind: "$igdb.involved_companies" },
+          { $match: { "igdb.involved_companies.developer": true } },
+          {
+            $group: {
+              _id: "$igdb.involved_companies.company.name",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        publisherStats: [
+          { $unwind: "$igdb.involved_companies" },
+          { $match: { "igdb.involved_companies.publisher": true } },
+          {
+            $group: {
+              _id: "$igdb.involved_companies.company.name",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        gameModeStats: [
+          { $unwind: "$igdb.game_modes" },
+          {
+            $group: {
+              _id: "$igdb.game_modes.name",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        ratingStats: [
+          { $match: { "igdb.aggregated_rating": { $exists: true } } },
+          {
+            $bucket: {
+              groupBy: "$igdb.aggregated_rating",
+              boundaries: [0, 50, 75, 90, 101],
+              default: "Others",
+              output: {
+                playTime: { $sum: "$playTime" },
+                count: { $sum: 1 },
+                averageRating: { $avg: "$igdb.aggregated_rating" }
+              }
+            }
+          }
+        ],
+        themeStats: [
+          { $unwind: "$igdb.themes" },
+          {
+            $group: {
+              _id: "$igdb.themes.name",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ],
+        releaseYearStats: [
+          { $match: { "igdb.first_release_date": { $exists: true } } },
+          {
+            $addFields: {
+              releaseDate: {
+                $toDate: { $multiply: ["$igdb.first_release_date", 1000] }
+              }
+            }
+          },
+          {
+            $group: {
+              _id: { $year: "$releaseDate" },
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { _id: -1 } }
+        ],
+        playerPerspectiveStats: [
+          { $unwind: "$igdb.player_perspectives" },
+          {
+            $group: {
+              _id: "$igdb.player_perspectives.name",
+              playTime: { $sum: "$playTime" },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { playTime: -1 } }
+        ]
+      }
+    }
+  ]);
+
+  const [
+    {
+      platformStats,
+      statusStats,
+      genreStats,
+      developerStats,
+      publisherStats,
+      gameModeStats,
+      ratingStats,
+      themeStats,
+      releaseYearStats,
+      playerPerspectiveStats,
+      myGamesRatingStats
+    }
+  ] = results;
+
+  return {
+    platformStats,
+    statusStats,
+    genreStats,
+    developerStats,
+    publisherStats,
+    gameModeStats,
+    ratingStats,
+    themeStats,
+    releaseYearStats,
+    playerPerspectiveStats,
+    myGamesRatingStats
+  };
+}
+
 export default {
   getGameById,
   getUserGameById,
   getGames,
   createGame,
-  findGameByIdAndDelete
+  findGameByIdAndDelete,
+  getGameStatistics
 };
