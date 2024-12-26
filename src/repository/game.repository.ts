@@ -73,6 +73,30 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
           },
           { $sort: { playTime: -1 } }
         ],
+        myGamesRatingStats: [
+          {
+            $bucketAuto: {
+              groupBy: "$rating",
+              buckets: 10,
+              output: {
+                playTime: { $sum: "$playTime" },
+                count: { $sum: 1 },
+                averageRating: { $avg: "$rating" }
+              }
+            }
+          },
+          {
+            $project: {
+              _id: {
+                $concat: ["$id.min", " ", "$id.max"]
+              },
+              playTime: 1,
+              count: 1,
+              averageRating: 1
+            }
+          },
+          { $sort: { averageRating: 1 } }
+        ],
         genreStats: [
           { $unwind: "$igdb.genres" },
           {
@@ -124,9 +148,13 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
           {
             $bucket: {
               groupBy: "$igdb.aggregated_rating",
-              boundaries: [0, 50, 75, 90, 100],
+              boundaries: [0, 50, 75, 90, 101],
               default: "Others",
-              output: { playTime: { $sum: "$playTime" }, count: { $sum: 1 } }
+              output: {
+                playTime: { $sum: "$playTime" },
+                count: { $sum: 1 },
+                averageRating: { $avg: "$igdb.aggregated_rating" }
+              }
             }
           }
         ],
@@ -157,7 +185,7 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
               count: { $sum: 1 }
             }
           },
-          { $sort: { playTime: 1 } }
+          { $sort: { _id: -1 } }
         ],
         playerPerspectiveStats: [
           { $unwind: "$igdb.player_perspectives" },
@@ -185,7 +213,8 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
       ratingStats,
       themeStats,
       releaseYearStats,
-      playerPerspectiveStats
+      playerPerspectiveStats,
+      myGamesRatingStats
     }
   ] = results;
 
@@ -199,7 +228,8 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
     ratingStats,
     themeStats,
     releaseYearStats,
-    playerPerspectiveStats
+    playerPerspectiveStats,
+    myGamesRatingStats
   };
 }
 

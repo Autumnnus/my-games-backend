@@ -11,6 +11,7 @@ export type StatisticsResponse = {
   developerStats: StatisticData[];
   publisherStats: StatisticData[];
   gameModeStats: StatisticData[];
+  myGamesRatingStats: StatisticData[];
   ratingStats: StatisticData[];
   themeStats: StatisticData[];
   releaseYearStats: StatisticData[];
