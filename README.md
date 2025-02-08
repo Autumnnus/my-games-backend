@@ -10,4 +10,4 @@ This project aims to build the backend application of [My-Games](https://my-game
 - Screenshot share with Amazon Web Service S3 support
 - IGDB API Game Fetch
 
-[Frontend Project](https://github.com/VectortheGreat/my-games)
+[Frontend Project](https://github.com/Autumnnus/my-games)
