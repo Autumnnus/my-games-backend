@@ -9,7 +9,7 @@
     "start": "node ./dist/index.js",
     "dev": "nodemon ./src/index.ts",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json,scss}\" && eslint --fix \"**/*.{js,jsx,ts,tsx,css,md,json,scss}\" --ext .js,.jsx,.ts,.tsx",
-    "lint": "eslint src/**/*.{js,jsx,ts,tsx,json}"
+    "lint": "eslint src/**/*.{js,jsx,ts,tsx,json}",
   },
   "keywords": [],
   "author": "",
