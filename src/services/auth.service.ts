@@ -1,21 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import bcrypt from "bcryptjs";
-import nodemailer from "nodemailer";
-import sendEmail from "../helpers/functions/sendMail";
-import {
-  comparePassword,
-  validateUserInput
-} from "../helpers/input/inputHelpers";
-import User from "../models/User";
-import userRepository from "../repository/user.repository";
+import bcrypt from 'bcryptjs';
+import nodemailer from 'nodemailer';
+import sendEmail from '../helpers/functions/sendMail';
+import { comparePassword, validateUserInput } from '../helpers/input/inputHelpers';
+import User from '../models/User';
+import userRepository from '../repository/user.repository';
 
 async function registerService(email: string, name: any, password: string) {
   const existingUser = await userRepository.getUserByEmail(email);
   if (existingUser) {
-    throw new Error("User already exists");
+    throw new Error('User already exists');
   }
   if (!validateUserInput(email, password)) {
-    throw new Error("Please check your inputs");
+    throw new Error('Please check your inputs');
   }
   const newUser = await User.create({ email, name, password });
   return newUser;
@@ -23,14 +20,14 @@ async function registerService(email: string, name: any, password: string) {
 
 async function loginService(email: string, password: string) {
   if (!validateUserInput(email, password)) {
-    throw new Error("Please check your inputs");
+    throw new Error('Please check your inputs');
   }
-  const user = await User.findOne({ email }).select("+password");
-  if (!comparePassword(password, user?.password || "")) {
-    throw new Error("Please check your password");
+  const user = await User.findOne({ email }).select('+password');
+  if (!comparePassword(password, user?.password || '')) {
+    throw new Error('Please check your password');
   }
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   return user;
@@ -39,40 +36,37 @@ async function loginService(email: string, password: string) {
 async function forgotPasswordService(email: string) {
   const user = await userRepository.getUserByEmail(email);
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
-  const frontUrl = process.env.FRONTEND_URL || "https://my-games.netlify.app";
+  const frontUrl = process.env.FRONTEND_URL || 'https://my-games.netlify.app';
   const resetPasswordToken = user.getResetPasswordTokenFromUser();
   await user.save();
   const resetPasswordUrl = `${frontUrl}/auth/resetPassword?resetPasswordToken=${resetPasswordToken}`;
 
   const info = await sendEmail(
     user,
-    "Reset Password",
-    "We received a request to reset the password for your account. If you did not request this change, please ignore this email. No changes will be made to your account.",
+    'Reset Password',
+    'We received a request to reset the password for your account. If you did not request this change, please ignore this email. No changes will be made to your account.',
     resetPasswordUrl
   );
 
   return {
-    msg: "Email Sent",
+    msg: 'Email Sent',
     info: info,
-    preview: nodemailer.getTestMessageUrl(info)
+    preview: nodemailer.getTestMessageUrl(info),
   };
 }
 
-async function resetPasswordService(
-  resetPasswordToken: string,
-  password: string
-) {
+async function resetPasswordService(resetPasswordToken: string, password: string) {
   if (!resetPasswordToken) {
-    throw new Error("Please enter a valid token");
+    throw new Error('Please enter a valid token');
   }
   const user = await User.findOne({
     resetPasswordToken: resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() }
+    resetPasswordExpire: { $gt: Date.now() },
   });
   if (!user) {
-    throw new Error("Invalid Token or Session Expired");
+    throw new Error('Invalid Token or Session Expired');
   }
   user.password = password;
   user.resetPasswordToken = undefined;
@@ -80,14 +74,14 @@ async function resetPasswordService(
   await user.save();
   return {
     success: true,
-    message: "Reset Password Process Success"
+    message: 'Reset Password Process Success',
   };
 }
 
 async function editUserService(editInformation: any, userId: string) {
   const user = await User.findById(userId);
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
   //? IF NO CHANGES
   // if (editInformation.email && editInformation.email === user.email) {
@@ -96,19 +90,13 @@ async function editUserService(editInformation: any, userId: string) {
   //     .json({ success: false, message: "No changes detected email" });
   // }
   if (editInformation.name && editInformation.name === user?.name) {
-    throw new Error("No changes detected name");
+    throw new Error('No changes detected name');
   }
-  if (
-    editInformation.password &&
-    comparePassword(editInformation.password, user.password)
-  ) {
-    throw new Error("No changes detected password");
+  if (editInformation.password && comparePassword(editInformation.password, user.password)) {
+    throw new Error('No changes detected password');
   }
-  if (
-    editInformation.profileImage &&
-    editInformation.profileImage === user.profileImage
-  ) {
-    throw new Error("No changes detected profileImage");
+  if (editInformation.profileImage && editInformation.profileImage === user.profileImage) {
+    throw new Error('No changes detected profileImage');
   }
   //? EDIT
   // if (editInformation.email) {
@@ -119,10 +107,7 @@ async function editUserService(editInformation: any, userId: string) {
   }
   if (editInformation.password) {
     const salt = await bcrypt.genSalt(10);
-    editInformation.password = await bcrypt.hash(
-      editInformation.password,
-      salt
-    );
+    editInformation.password = await bcrypt.hash(editInformation.password, salt);
   }
   if (editInformation.profileImage) {
     user.profileImage = editInformation.profileImage;
@@ -130,7 +115,7 @@ async function editUserService(editInformation: any, userId: string) {
 
   const updatedUser = await User.findByIdAndUpdate(userId, editInformation, {
     new: true,
-    runValidators: true
+    runValidators: true,
   });
   return updatedUser;
 }
@@ -138,10 +123,10 @@ async function editUserService(editInformation: any, userId: string) {
 async function validateEmailService(email: string) {
   const user = await User.findOne({ email });
   if (!user) {
-    throw new Error("There is no user with that e-mail.");
+    throw new Error('There is no user with that e-mail.');
   }
   if (user.isVerified) {
-    throw new Error("This account is already verified.");
+    throw new Error('This account is already verified.');
   }
 
   const verificationToken = user.getVerificationTokenFromUser();
@@ -149,34 +134,34 @@ async function validateEmailService(email: string) {
   const verifyAccountUrl = `${process.env.FRONTEND_URL}/api/auth/verifyAccount?verificationToken=${verificationToken}`;
   const info = await sendEmail(
     user,
-    "Verify Account",
-    "We received a request to verify the email for your account. If you did not request this change, please ignore this email. No changes will be made to your account.",
+    'Verify Account',
+    'We received a request to verify the email for your account. If you did not request this change, please ignore this email. No changes will be made to your account.',
     verifyAccountUrl
   );
 
   return {
-    msg: "Email Sent",
+    msg: 'Email Sent',
     info: info,
-    preview: nodemailer.getTestMessageUrl(info)
+    preview: nodemailer.getTestMessageUrl(info),
   };
 }
 
 async function verifyAccountService(verificationToken: string) {
   if (!verificationToken) {
-    throw new Error("Please enter a valid token");
+    throw new Error('Please enter a valid token');
   }
   const user = await User.findOne({
     verificationToken: verificationToken,
-    verificationExpire: { $gt: Date.now() }
+    verificationExpire: { $gt: Date.now() },
   });
   if (!user) {
-    throw new Error("Invalid Token or Session Expired");
+    throw new Error('Invalid Token or Session Expired');
   }
   user.isVerified = true;
   user.verificationToken = undefined;
   user.verificationExpire = undefined;
   await user.save();
-  return "Account Verification Process Success";
+  return 'Account Verification Process Success';
 }
 
 export default {
@@ -186,5 +171,5 @@ export default {
   resetPasswordService,
   editUserService,
   validateEmailService,
-  verifyAccountService
+  verifyAccountService,
 };

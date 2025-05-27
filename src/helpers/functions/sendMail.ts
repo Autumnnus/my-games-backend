@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Mailgen from "mailgen";
-import nodemailer from "nodemailer";
-import CustomError from "../errors/CustomError";
+import Mailgen from 'mailgen';
+import nodemailer from 'nodemailer';
+import CustomError from '../errors/CustomError';
 
 // interface User {
 //   email: string;
@@ -39,32 +39,31 @@ const sendEmail = async (
       service: process.env.SMTP_SERVICE,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
+        pass: process.env.SMTP_PASS,
+      },
     });
     const MailGenerator = new Mailgen({
-      theme: "salted",
+      theme: 'salted',
       product: {
-        name: "Mailgen",
-        link: "https://mailgen.js/"
-      }
+        name: 'Mailgen',
+        link: 'https://mailgen.js/',
+      },
     });
 
     const response: MailContent = {
       body: {
-        greeting: "Dear User",
+        greeting: 'Dear User',
         intro: content,
         action: {
           instructions: `Click the button below to ${subject}:`,
           button: {
-            color: "#DC4D2F",
+            color: '#DC4D2F',
             text: subject,
-            link: url
-          }
+            link: url,
+          },
         },
-        outro:
-          "Thank you for taking the time to ensure the security of your account."
-      }
+        outro: 'Thank you for taking the time to ensure the security of your account.',
+      },
     };
 
     const mail = MailGenerator.generate(response);
@@ -72,7 +71,7 @@ const sendEmail = async (
       from: `My Games ${process.env.SMTP_USER}`,
       to: user.email,
       subject: subject,
-      html: mail
+      html: mail,
     };
 
     const info = await transporter.sendMail(message);
@@ -83,11 +82,8 @@ const sendEmail = async (
     user.verificationToken = undefined;
     user.verificationExpire = undefined;
     await user.save();
-    console.error("ERROR: ", err);
-    throw new CustomError(
-      `Email couldn't be Sent: ${err.response}`,
-      err.responseCode
-    );
+    console.error('ERROR: ', err);
+    throw new CustomError(`Email couldn't be Sent: ${err.response}`, err.responseCode);
   }
 };
 export default sendEmail;

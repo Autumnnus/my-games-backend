@@ -1,4 +1,4 @@
-import Statistics from "../models/Statistics";
+import Statistics from '../models/Statistics';
 
 async function getAllStatistics() {
   return await Statistics.findOne({ user: null });

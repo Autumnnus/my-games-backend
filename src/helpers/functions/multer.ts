@@ -1,4 +1,4 @@
-import multer from "multer";
+import multer from 'multer';
 
 //? Local
 // const storage = multer.diskStorage({

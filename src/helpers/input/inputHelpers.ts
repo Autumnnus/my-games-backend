@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
 const validateUserInput = (email: string, password: string) => {
   return email && password;

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mongoose from "mongoose";
-import Games from "../models/Games";
-import { StatisticsResponse } from "../types/statistics";
+import mongoose from 'mongoose';
+import Games from '../models/Games';
+import { StatisticsResponse } from '../types/statistics';
 
 type MatchCriteria = {
   [key: string]: string | { $regex: unknown; $options: string };
 };
 
 type SortCriteria = {
-  [key: string]: "asc" | "desc" | 1 | -1;
+  [key: string]: 'asc' | 'desc' | 1 | -1;
 };
 
 async function getGameById(id: string) {
@@ -22,7 +22,7 @@ async function getUserGameById(userId: string) {
 async function createGame(data: any, userId: string) {
   return await Games.create({
     ...data,
-    userId
+    userId,
   });
 }
 
@@ -56,150 +56,150 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
         platformStats: [
           {
             $group: {
-              _id: "$platform",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$platform',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         statusStats: [
           {
             $group: {
-              _id: "$status",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$status',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         myGamesRatingStats: [
           {
             $bucketAuto: {
-              groupBy: "$rating",
+              groupBy: '$rating',
               buckets: 10,
               output: {
-                playTime: { $sum: "$playTime" },
+                playTime: { $sum: '$playTime' },
                 count: { $sum: 1 },
-                averageRating: { $avg: "$rating" }
-              }
-            }
+                averageRating: { $avg: '$rating' },
+              },
+            },
           },
           {
             $project: {
               _id: {
-                $concat: ["$id.min", " ", "$id.max"]
+                $concat: ['$id.min', ' ', '$id.max'],
               },
               playTime: 1,
               count: 1,
-              averageRating: 1
-            }
+              averageRating: 1,
+            },
           },
-          { $sort: { averageRating: 1 } }
+          { $sort: { averageRating: 1 } },
         ],
         genreStats: [
-          { $unwind: "$igdb.genres" },
+          { $unwind: '$igdb.genres' },
           {
             $group: {
-              _id: "$igdb.genres.name",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$igdb.genres.name',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         developerStats: [
-          { $unwind: "$igdb.involved_companies" },
-          { $match: { "igdb.involved_companies.developer": true } },
+          { $unwind: '$igdb.involved_companies' },
+          { $match: { 'igdb.involved_companies.developer': true } },
           {
             $group: {
-              _id: "$igdb.involved_companies.company.name",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$igdb.involved_companies.company.name',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         publisherStats: [
-          { $unwind: "$igdb.involved_companies" },
-          { $match: { "igdb.involved_companies.publisher": true } },
+          { $unwind: '$igdb.involved_companies' },
+          { $match: { 'igdb.involved_companies.publisher': true } },
           {
             $group: {
-              _id: "$igdb.involved_companies.company.name",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$igdb.involved_companies.company.name',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         gameModeStats: [
-          { $unwind: "$igdb.game_modes" },
+          { $unwind: '$igdb.game_modes' },
           {
             $group: {
-              _id: "$igdb.game_modes.name",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$igdb.game_modes.name',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         ratingStats: [
-          { $match: { "igdb.aggregated_rating": { $exists: true } } },
+          { $match: { 'igdb.aggregated_rating': { $exists: true } } },
           {
             $bucket: {
-              groupBy: "$igdb.aggregated_rating",
+              groupBy: '$igdb.aggregated_rating',
               boundaries: [0, 50, 75, 90, 101],
-              default: "Others",
+              default: 'Others',
               output: {
-                playTime: { $sum: "$playTime" },
+                playTime: { $sum: '$playTime' },
                 count: { $sum: 1 },
-                averageRating: { $avg: "$igdb.aggregated_rating" }
-              }
-            }
-          }
+                averageRating: { $avg: '$igdb.aggregated_rating' },
+              },
+            },
+          },
         ],
         themeStats: [
-          { $unwind: "$igdb.themes" },
+          { $unwind: '$igdb.themes' },
           {
             $group: {
-              _id: "$igdb.themes.name",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$igdb.themes.name',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
+          { $sort: { playTime: -1 } },
         ],
         releaseYearStats: [
-          { $match: { "igdb.first_release_date": { $exists: true } } },
+          { $match: { 'igdb.first_release_date': { $exists: true } } },
           {
             $addFields: {
               releaseDate: {
-                $toDate: { $multiply: ["$igdb.first_release_date", 1000] }
-              }
-            }
+                $toDate: { $multiply: ['$igdb.first_release_date', 1000] },
+              },
+            },
           },
           {
             $group: {
-              _id: { $year: "$releaseDate" },
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: { $year: '$releaseDate' },
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { _id: -1 } }
+          { $sort: { _id: -1 } },
         ],
         playerPerspectiveStats: [
-          { $unwind: "$igdb.player_perspectives" },
+          { $unwind: '$igdb.player_perspectives' },
           {
             $group: {
-              _id: "$igdb.player_perspectives.name",
-              playTime: { $sum: "$playTime" },
-              count: { $sum: 1 }
-            }
+              _id: '$igdb.player_perspectives.name',
+              playTime: { $sum: '$playTime' },
+              count: { $sum: 1 },
+            },
           },
-          { $sort: { playTime: -1 } }
-        ]
-      }
-    }
+          { $sort: { playTime: -1 } },
+        ],
+      },
+    },
   ]);
 
   const [
@@ -214,8 +214,8 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
       themeStats,
       releaseYearStats,
       playerPerspectiveStats,
-      myGamesRatingStats
-    }
+      myGamesRatingStats,
+    },
   ] = results;
 
   return {
@@ -229,7 +229,7 @@ async function getGameStatistics(userId?: string): Promise<StatisticsResponse> {
     themeStats,
     releaseYearStats,
     playerPerspectiveStats,
-    myGamesRatingStats
+    myGamesRatingStats,
   };
 }
 
@@ -239,5 +239,5 @@ export default {
   getGames,
   createGame,
   findGameByIdAndDelete,
-  getGameStatistics
+  getGameStatistics,
 };

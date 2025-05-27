@@ -11,5 +11,5 @@ export const createResponse = <T>(
 ): ApiResponse<T> => ({
   success,
   errorMessage,
-  data
+  data,
 });

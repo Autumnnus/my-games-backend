@@ -1,8 +1,8 @@
-import { Response } from "express";
-import expressAsyncHandler from "express-async-handler";
-import { createResponse } from "../middlewares/error/CreateResponse";
-import statisticsService from "../services/statistics.service";
-import { AuthenticatedRequest } from "../types/request";
+import { Response } from 'express';
+import expressAsyncHandler from 'express-async-handler';
+import { createResponse } from '../middlewares/error/CreateResponse';
+import statisticsService from '../services/statistics.service';
+import { AuthenticatedRequest } from '../types/request';
 
 const getStatisticsController = expressAsyncHandler(
   async (_: AuthenticatedRequest, res: Response) => {
@@ -29,12 +29,8 @@ const getUserStatisticsController = expressAsyncHandler(
 
 const updateStatisticsController = expressAsyncHandler(
   async (_: AuthenticatedRequest, res: Response) => {
-    if (process.env.NODE_ENV !== "development") {
-      res
-        .status(404)
-        .json(
-          createResponse("This action is only allowed in development mode")
-        );
+    if (process.env.NODE_ENV !== 'development') {
+      res.status(404).json(createResponse('This action is only allowed in development mode'));
     }
     try {
       const data = await statisticsService.updateStatisticsService();
@@ -45,8 +41,4 @@ const updateStatisticsController = expressAsyncHandler(
   }
 );
 
-export {
-  getStatisticsController,
-  getUserStatisticsController,
-  updateStatisticsController
-};
+export { getStatisticsController, getUserStatisticsController, updateStatisticsController };

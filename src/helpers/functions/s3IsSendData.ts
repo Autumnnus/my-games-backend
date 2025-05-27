@@ -1,8 +1,6 @@
-import { S3 } from "aws-sdk";
+import { S3 } from 'aws-sdk';
 
-export function isSendData(
-  data: S3.ManagedUpload.SendData
-): data is S3.ManagedUpload.SendData {
+export function isSendData(data: S3.ManagedUpload.SendData): data is S3.ManagedUpload.SendData {
   return (data as S3.ManagedUpload.SendData).Location !== undefined;
 }
 

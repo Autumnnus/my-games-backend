@@ -1,7 +1,7 @@
-import Statistics from "../models/Statistics";
-import gameRepository from "../repository/game.repository";
-import statisticsRepository from "../repository/statistics.repository";
-import userRepository from "../repository/user.repository";
+import Statistics from '../models/Statistics';
+import gameRepository from '../repository/game.repository';
+import statisticsRepository from '../repository/statistics.repository';
+import userRepository from '../repository/user.repository';
 
 async function getStatisticsService() {
   return await statisticsRepository.getAllStatistics();
@@ -15,7 +15,7 @@ async function updateStatisticsService() {
   try {
     const users = await userRepository.findAllUsers();
     if (!users.length) {
-      console.log("No users found.");
+      console.log('No users found.');
       return [];
     }
     const updatedStatistics = [];
@@ -44,7 +44,7 @@ async function updateStatisticsService() {
 
     return updatedStatistics;
   } catch (error) {
-    console.error("Error updating statistics:", error);
+    console.error('Error updating statistics:', error);
     return [];
   }
 }
@@ -52,5 +52,5 @@ async function updateStatisticsService() {
 export default {
   getStatisticsService,
   getUserStatisticsService,
-  updateStatisticsService
+  updateStatisticsService,
 };

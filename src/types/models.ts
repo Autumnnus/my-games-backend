@@ -1,25 +1,25 @@
-import mongoose from "mongoose";
-import { StatisticsResponse } from "./statistics";
+import mongoose from 'mongoose';
+import { StatisticsResponse } from './statistics';
 
 export type GamesData = {
   name: string;
   photo?: string;
   lastPlay: Date;
   platform:
-    | "steam"
-    | "epicGames"
-    | "ubisoft"
-    | "xboxPc"
-    | "eaGames"
-    | "torrent"
-    | "playstation"
-    | "xboxSeries"
-    | "nintendo"
-    | "mobile"
-    | "otherPlatforms";
+    | 'steam'
+    | 'epicGames'
+    | 'ubisoft'
+    | 'xboxPc'
+    | 'eaGames'
+    | 'torrent'
+    | 'playstation'
+    | 'xboxSeries'
+    | 'nintendo'
+    | 'mobile'
+    | 'otherPlatforms';
   review?: string;
   rating?: number;
-  status: "completed" | "abandoned" | "toBeCompleted" | "activePlaying";
+  status: 'completed' | 'abandoned' | 'toBeCompleted' | 'activePlaying';
   playTime: number;
   isFavorite?: boolean;
   screenshotSize?: number;
@@ -90,7 +90,7 @@ export type UserData = {
     name: string;
     rating?: number;
     photo?: string;
-    ref: "Games";
+    ref: 'Games';
   }[];
   createdAt: Date;
   updatedAt: Date;

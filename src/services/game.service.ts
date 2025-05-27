@@ -1,67 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Games from "../models/Games";
-import User from "../models/User";
-import gameRepository from "../repository/game.repository";
-import userRepository from "../repository/user.repository";
-import { GamesData } from "../types/models";
+import Games from '../models/Games';
+import User from '../models/User';
+import gameRepository from '../repository/game.repository';
+import userRepository from '../repository/user.repository';
+import { GamesData } from '../types/models';
 
 type GetUserGamesParams = {
   id: string;
   sortBy?: string | undefined;
-  order?: "asc" | "desc";
+  order?: 'asc' | 'desc';
   search?: string;
   page?: number;
   limit?: number;
 };
 
 type GameFields = {
-  name: GamesData["name"];
-  photo: GamesData["photo"];
-  lastPlay: GamesData["lastPlay"];
-  platform: GamesData["platform"];
-  review: GamesData["review"];
-  rating: GamesData["rating"];
-  status: GamesData["status"];
-  playTime: GamesData["playTime"];
-  firstFinished: GamesData["firstFinished"];
-  igdb?: GamesData["igdb"];
+  name: GamesData['name'];
+  photo: GamesData['photo'];
+  lastPlay: GamesData['lastPlay'];
+  platform: GamesData['platform'];
+  review: GamesData['review'];
+  rating: GamesData['rating'];
+  status: GamesData['status'];
+  playTime: GamesData['playTime'];
+  firstFinished: GamesData['firstFinished'];
+  igdb?: GamesData['igdb'];
 };
 
 async function addNewGameService(data: any, userId: string) {
   const game = await gameRepository.createGame(data, userId);
   const user = await userRepository.getUserById(userId);
   if (!user) {
-    throw new Error("Game not found");
+    throw new Error('Game not found');
   }
   const userGames = await gameRepository.getUserGameById(userId);
-  if (data.status === "completed") {
-    user.completedGameSize =
-      userGames.filter((game) => game.status === "completed").length + 1;
+  if (data.status === 'completed') {
+    user.completedGameSize = userGames.filter(game => game.status === 'completed').length + 1;
   }
   user.gameSize = userGames.length + 1;
+
   await user.save();
   return game;
 }
 
 async function editGameService(data: any, gameId: string, userId: string) {
-  const {
-    name,
-    photo,
-    lastPlay,
-    platform,
-    review,
-    rating,
-    status,
-    playTime,
-    firstFinished,
-    igdb
-  } = data;
+  const { name, photo, lastPlay, platform, review, rating, status, playTime, firstFinished, igdb } =
+    data;
   let game = await gameRepository.getGameById(gameId);
   if (!game) {
-    throw new Error("Game not found");
+    throw new Error('Game not found');
   }
-  const updatedIGDB =
-    igdb && igdb.cover && Object.keys(igdb.cover).length > 0 ? igdb : game.igdb;
+  const updatedIGDB = igdb && igdb.cover && Object.keys(igdb.cover).length > 0 ? igdb : game.igdb;
 
   const updatedGameFields: GameFields = {
     name: name || game.name,
@@ -73,7 +62,7 @@ async function editGameService(data: any, gameId: string, userId: string) {
     status: status || game.status,
     playTime: playTime || game.playTime,
     firstFinished: firstFinished || game.firstFinished,
-    igdb: updatedIGDB
+    igdb: updatedIGDB,
   };
   Object.assign(game, updatedGameFields);
   game = await game.save();
@@ -83,14 +72,12 @@ async function editGameService(data: any, gameId: string, userId: string) {
   if (oldStatus !== status) {
     const user = await userRepository.getUserById(userId);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error('User not found');
     }
-    if (status === "completed") {
-      user.completedGameSize =
-        userGames.filter((game) => game.status === "completed").length + 1;
-    } else if (oldStatus === "completed" && status !== "completed") {
-      user.completedGameSize =
-        userGames.filter((game) => game.status === "completed").length - 1;
+    if (status === 'completed') {
+      user.completedGameSize = userGames.filter(game => game.status === 'completed').length + 1;
+    } else if (oldStatus === 'completed' && status !== 'completed') {
+      user.completedGameSize = userGames.filter(game => game.status === 'completed').length - 1;
     }
     await user.save();
   }
@@ -100,16 +87,15 @@ async function editGameService(data: any, gameId: string, userId: string) {
 async function deleteGameService(gameId: string, userId: string) {
   const game = await gameRepository.getGameById(gameId);
   if (!game) {
-    throw new Error("Game not found");
+    throw new Error('Game not found');
   }
   const user = await userRepository.getUserById(userId);
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
   const userGames = await gameRepository.getUserGameById(userId);
-  if (game.status === "completed") {
-    user.completedGameSize =
-      userGames.filter((game) => game.status === "completed").length - 1;
+  if (game.status === 'completed') {
+    user.completedGameSize = userGames.filter(game => game.status === 'completed').length - 1;
     await user.save();
   }
   user.gameSize = userGames.length + 1;
@@ -121,7 +107,7 @@ async function deleteGameService(gameId: string, userId: string) {
 async function getGameDetailService(gameId: string) {
   const game = await gameRepository.getGameById(gameId);
   if (!game) {
-    throw new Error("Game not found");
+    throw new Error('Game not found');
   }
   return game;
 }
@@ -129,12 +115,10 @@ async function getGameDetailService(gameId: string) {
 async function setFavoriteGamesService(userId: string, gameIds: any[]) {
   const user = await userRepository.getUserById(userId);
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
-  const games = await Promise.all(
-    gameIds.map((id) => gameRepository.getGameById(id))
-  );
+  const games = await Promise.all(gameIds.map(id => gameRepository.getGameById(id)));
 
   for (const [index, game] of games.entries()) {
     if (!game) {
@@ -144,67 +128,52 @@ async function setFavoriteGamesService(userId: string, gameIds: any[]) {
     await game.save();
   }
 
-  await Games.updateMany(
-    { _id: { $nin: gameIds }, isFavorite: true },
-    { isFavorite: false }
-  );
+  await Games.updateMany({ _id: { $nin: gameIds }, isFavorite: true }, { isFavorite: false });
 
   user.favoriteGames = gameIds;
   await user.save();
-  return games.map((game) => ({
+  return games.map(game => ({
     _id: game?._id,
     name: game?.name,
     photo: game?.photo,
-    rating: game?.rating
+    rating: game?.rating,
   }));
 }
 
 async function getFavoriteGamesService(userId: string) {
-  const user = await User.findById(userId).populate("favoriteGames");
+  const user = await User.findById(userId).populate('favoriteGames');
   if (!user) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
-  return user.favoriteGames?.map((game) => ({
+  return user.favoriteGames?.map(game => ({
     _id: game._id,
     name: game.name,
     photo: game.photo,
-    rating: game.rating
+    rating: game.rating,
   }));
 }
 
-async function getUserGamesService({
-  id,
-  sortBy,
-  order,
-  search,
-  page,
-  limit
-}: GetUserGamesParams) {
-  let sortCriteria: { [key: string]: "asc" | "desc" | 1 | -1 } = {
-    lastPlay: -1
+async function getUserGamesService({ id, sortBy, order, search, page, limit }: GetUserGamesParams) {
+  let sortCriteria: { [key: string]: 'asc' | 'desc' | 1 | -1 } = {
+    lastPlay: -1,
   };
   const matchCriteria: {
     [key: string]: string | { $regex: unknown; $options: string };
   } = { userId: id };
 
   if (sortBy) {
-    sortCriteria = { [sortBy as string]: order === "asc" ? 1 : -1 };
+    sortCriteria = { [sortBy as string]: order === 'asc' ? 1 : -1 };
   }
   if (search) {
-    matchCriteria.name = { $regex: search, $options: "i" };
+    matchCriteria.name = { $regex: search, $options: 'i' };
   }
 
   const pageNum = page ? parseInt(String(page), 10) : 1;
   const limitNum = limit ? parseInt(String(limit), 10) : 0;
   const skip = (pageNum - 1) * limitNum;
 
-  const userGamesQuery = await gameRepository.getGames(
-    matchCriteria,
-    sortCriteria,
-    skip,
-    limitNum
-  );
+  const userGamesQuery = await gameRepository.getGames(matchCriteria, sortCriteria, skip, limitNum);
   return userGamesQuery;
 }
 
@@ -215,5 +184,5 @@ export default {
   getUserGamesService,
   editGameService,
   setFavoriteGamesService,
-  getFavoriteGamesService
+  getFavoriteGamesService,
 };
