@@ -5,14 +5,7 @@ import User from '../models/User';
 import { ScreenshotData } from '../types/models';
 import { s3Deletev2, s3Updatev2, s3Uploadv2 } from './s3Service';
 
-type AddScreenShotServiceParams = {
-  userId: string;
-  gameId: string;
-  type: 'text' | 'image';
-  name?: string;
-  url?: string;
-  files?: Express.Multer.File[];
-};
+
 
 type EditScreenShotServiceParams = {
   userId: string;
@@ -24,8 +17,28 @@ type EditScreenShotServiceParams = {
   file?: Express.Multer.File;
 };
 
-async function addScreenshotService(params: AddScreenShotServiceParams) {
-  const { userId, gameId, type, name, url, files } = params;
+interface AddScreenShotRequestByUrl {
+  userId: string;
+  gameId: string;
+  type: 'text' | 'image';
+  payload:{
+      name?: string
+    url: string
+  }[]
+}
+
+interface AddScreenShotRequestByFile {
+  userId: string;
+  gameId: string;
+  type: 'text' | 'image';
+  payload: {
+    name?: string
+    files: Express.Multer.File
+  }[]
+}
+
+async function addScreenshotService(params: AddScreenShotRequestByUrl | AddScreenShotRequestByFile) {
+  const { userId, gameId, type, payload } = params;
   const user = await User.findById(userId);
   if (!user) {
     throw new Error('User not found');
@@ -37,30 +50,32 @@ async function addScreenshotService(params: AddScreenShotServiceParams) {
   const role = user.role;
   const userScreenshots = await Screenshot.find({ user: userId });
   const gameScreenshots = await Screenshot.find({ game: gameId });
-
+console.log('params',params)
   if (type === 'text') {
-    const screenshot = await Screenshot.create({
-      name,
-      url,
-      user: userId,
-      game: gameId,
-      type: 'text',
-    });
+    for (const item of payload as AddScreenShotRequestByUrl['payload']) {
+      const screenshot = await Screenshot.create({
+        name: item.name,
+        url: item.url,
+        user: userId,
+        game: gameId,
+        type: 'text',
+      });
     user.screenshotSize = userScreenshots.length + 1;
     game.screenshotSize = gameScreenshots.length + 1;
     await user.save();
     await game.save();
     return screenshot;
+    }
   } else if (type === 'image') {
     if (role !== 'admin' && role !== 'vip') {
       throw new Error('You are not authorized to upload image');
     }
-    if (!files || files.length === 0) {
+    if (!payload || payload.length === 0) {
       throw new Error('Please upload a file');
     }
     const screenshots = [];
-    for (const file of files) {
-      const awsFile = await s3Uploadv2(file);
+    for (const file of payload as AddScreenShotRequestByFile['payload']) {
+      const awsFile = await s3Uploadv2(file.files);
       let screenshot: ScreenshotData | undefined;
       if (isErrorData(awsFile)) {
         if (awsFile.success === false) {
@@ -68,7 +83,7 @@ async function addScreenshotService(params: AddScreenShotServiceParams) {
         }
       } else if (isSendData(awsFile)) {
         screenshot = await Screenshot.create({
-          name,
+          name: file.name,
           url: awsFile.Location,
           user: userId,
           key: awsFile.Key,
@@ -77,8 +92,8 @@ async function addScreenshotService(params: AddScreenShotServiceParams) {
         });
       }
       screenshots.push(screenshot);
-      user.screenshotSize = userScreenshots.length + files.length;
-      game.screenshotSize = gameScreenshots.length + files.length;
+      user.screenshotSize = userScreenshots.length + payload.length;
+      game.screenshotSize = gameScreenshots.length + payload.length;
       await user.save();
       await game.save();
     }

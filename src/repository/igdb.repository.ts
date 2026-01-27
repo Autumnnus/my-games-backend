@@ -1,29 +1,35 @@
+import igdbAuthHelper from '../helpers/igdb-auth.helper';
 import { IgdbData } from '../types/models';
 
-async function fetchIgdbGames(body: string): Promise<IgdbData[]> {
-  if (!process.env.IGDB_CLIENT_ID || !process.env.IGDB_ACCESS_TOKEN) {
-    throw new Error('IGDB credentials are missing');
+async function fetchIgdbGames(body: string, isRetry = false): Promise<IgdbData[]> {
+  const clientId = process.env.IGDB_CLIENT_ID;
+  if (!clientId) {
+    throw new Error('IGDB_CLIENT_ID is missing');
   }
 
-  fetch(`https://api.igdb.com/v4/games`, {
-    method: 'POST',
-    headers: {
-      'Client-ID': process.env.IGDB_CLIENT_ID,
-      Authorization: `Bearer ${process.env.IGDB_ACCESS_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: body,
-  });
+  const accessToken = await igdbAuthHelper.getAccessToken();
+
   const response = await fetch(`https://api.igdb.com/v4/games`, {
     method: 'POST',
     headers: {
-      'Client-ID': process.env.IGDB_CLIENT_ID!,
-      Authorization: `Bearer ${process.env.IGDB_ACCESS_TOKEN}`,
+      'Client-ID': clientId,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: body,
   });
-  return await response.json();
+
+  if (response.status === 401 && !isRetry) {
+    await igdbAuthHelper.refreshAccessToken();
+    return await fetchIgdbGames(body, true);
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`IGDB API error: ${response.status} - ${errorText}`);
+  }
+
+  return (await response.json()) as IgdbData[];
 }
 
 export default { fetchIgdbGames };

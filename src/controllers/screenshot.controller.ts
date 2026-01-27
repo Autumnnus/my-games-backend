@@ -13,15 +13,13 @@ interface AuthenticatedFileRequest extends Request {
 
 const addScreenshotController = async (req: AuthenticatedFileRequest, res: Response) => {
   const { game_id } = req.params;
-  const { name, type, url } = req.body;
+  const { type } = req.body;
   try {
     const data = await screenshotService.addScreenshotService({
       gameId: game_id,
       userId: req.user?.id || '',
-      files: req.files,
       type,
-      name,
-      url,
+      payload: req.body.payload
     });
     res.status(200).json(createResponse(data));
   } catch (err) {
